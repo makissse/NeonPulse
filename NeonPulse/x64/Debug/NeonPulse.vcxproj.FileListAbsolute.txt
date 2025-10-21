@@ -4,3 +4,6 @@ C:\Users\makissse\Desktop\RayLibStarterTemplateEmpty\NeonPulse\x64\Debug\NeonPul
 C:\Users\makissse\Documents\GitHub\NeonPulse\x64\Debug\raylib.dll
 C:\Users\makissse\Documents\GitHub\NeonPulse\x64\Debug\glfw3.dll
 C:\Users\makissse\Documents\GitHub\NeonPulse\NeonPulse\x64\Debug\NeonPulse.vcxproj.Up2Date
+C:\Users\makissse\Desktop\NeonPulse1213\x64\Debug\raylib.dll
+C:\Users\makissse\Desktop\NeonPulse1213\x64\Debug\glfw3.dll
+C:\Users\makissse\Desktop\NeonPulse1213\NeonPulse\x64\Debug\NeonPulse.vcxproj.Up2Date

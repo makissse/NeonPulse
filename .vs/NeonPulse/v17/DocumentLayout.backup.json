@@ -1,10 +1,26 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\",
+  "WorkspaceRootPath": "C:\\Users\\makissse\\Desktop\\NeonPulse1213\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{1B063D85-6010-4661-A1FB-B27C915EAA7D}|NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{1B063D85-6010-4661-A1FB-B27C915EAA7D}|NeonPulse.vcxproj|C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\background\\background.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1B063D85-6010-4661-A1FB-B27C915EAA7D}|NeonPulse.vcxproj|solutionrelative:src\\background\\background.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B063D85-6010-4661-A1FB-B27C915EAA7D}|NeonPulse.vcxproj|C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\utils\\utils.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1B063D85-6010-4661-A1FB-B27C915EAA7D}|NeonPulse.vcxproj|solutionrelative:src\\utils\\utils.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B063D85-6010-4661-A1FB-B27C915EAA7D}|NeonPulse.vcxproj|C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{1B063D85-6010-4661-A1FB-B27C915EAA7D}|NeonPulse.vcxproj|solutionrelative:src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B063D85-6010-4661-A1FB-B27C915EAA7D}|NeonPulse.vcxproj|C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\utils\\utils.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1B063D85-6010-4661-A1FB-B27C915EAA7D}|NeonPulse.vcxproj|solutionrelative:src\\utils\\utils.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1B063D85-6010-4661-A1FB-B27C915EAA7D}|NeonPulse.vcxproj|C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\background\\background.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{1B063D85-6010-4661-A1FB-B27C915EAA7D}|NeonPulse.vcxproj|solutionrelative:src\\background\\background.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 341,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -22,13 +38,65 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "utils.h",
+              "DocumentMoniker": "C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\utils\\utils.h",
+              "RelativeDocumentMoniker": "src\\utils\\utils.h",
+              "ToolTip": "C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\utils\\utils.h",
+              "RelativeToolTip": "src\\utils\\utils.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-10-21T15:59:51.394Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "utils.cpp",
+              "DocumentMoniker": "C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\utils\\utils.cpp",
+              "RelativeDocumentMoniker": "src\\utils\\utils.cpp",
+              "ToolTip": "C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\utils\\utils.cpp",
+              "RelativeToolTip": "src\\utils\\utils.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-21T15:59:39.513Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "background.cpp",
+              "DocumentMoniker": "C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\background\\background.cpp",
+              "RelativeDocumentMoniker": "src\\background\\background.cpp",
+              "ToolTip": "C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\background\\background.cpp",
+              "RelativeToolTip": "src\\background\\background.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAABkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-21T15:52:43.702Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "background.h",
+              "DocumentMoniker": "C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\background\\background.h",
+              "RelativeDocumentMoniker": "src\\background\\background.h",
+              "ToolTip": "C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\background\\background.h",
+              "RelativeToolTip": "src\\background\\background.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-10-21T15:52:20.691Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "main.cpp",
-              "DocumentMoniker": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\src\\main.cpp",
+              "DocumentMoniker": "C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\main.cpp",
               "RelativeDocumentMoniker": "src\\main.cpp",
-              "ToolTip": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\src\\main.cpp",
+              "ToolTip": "C:\\Users\\makissse\\Desktop\\NeonPulse1213\\src\\main.cpp",
               "RelativeToolTip": "src\\main.cpp",
-              "ViewState": "AgIAABwCAAAAAAAAAAAwwCkCAABCAAAAAAAAAA==",
+              "ViewState": "AgIAAIUBAAAAAAAAAAAvwKEBAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-09-17T07:22:58.921Z",
               "EditorCaption": ""

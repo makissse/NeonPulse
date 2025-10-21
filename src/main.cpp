@@ -1,4 +1,3 @@
-
 #include "raylib.h"
 #include "raymath.h"
 #include <vector>
@@ -7,145 +6,11 @@
 #include <algorithm>
 #include <string>
 
+#include "utils/utils.h"
+#include "entities/entities.h"
+#include "background/background.h"
+
 using namespace std;
-
-// -------------------------
-// Basic structs
-// -------------------------
-struct MovingPlatform {
-    Rectangle base;
-    float amplitude;
-    float speed;
-    bool vertical;
-    Color color;
-    float phase;
-
-    Rectangle GetRect(float t) const {
-        Rectangle r = base;
-        float offset = amplitude * sinf(phase + t * speed * 2.0f * PI);
-        if (vertical) r.y += offset;
-        else r.x += offset;
-        return r;
-    }
-};
-
-struct Spike {
-    Rectangle base;
-    bool up;
-    Color color;
-};
-
-struct Arch {             // decorative arch (was tunnel) - doesn't change floor/ceiling
-    Rectangle bounds;
-    Color glow;
-};
-
-struct Section {
-    float startX;
-    float endX;
-    Color bgA;
-    Color bgB;
-};
-
-struct ParallaxLayer {
-    float speed;
-    Color color;
-    int density;
-    float scaleMin;
-    float scaleMax;
-};
-
-struct Particle {
-    Vector2 pos;
-    Vector2 vel;
-    float life;
-    float size;
-    Color color;
-};
-
-// New gameplay items
-struct JumpPad {
-    Rectangle rect;
-    float strength;   // multiplies jumpVel (positive upward)
-    Color color;
-};
-
-struct SpeedPad {
-    Rectangle rect;
-    float multiplier; // multiplies runSpeed for a short duration
-    float duration;   // seconds
-    Color color;
-};
-
-// -------------------------
-// Helpers
-// -------------------------
-static bool RectsIntersect(const Rectangle& a, const Rectangle& b) {
-    return !(a.x + a.width <= b.x || b.x + b.width <= a.x ||
-        a.y + a.height <= b.y || b.y + b.height <= a.y);
-}
-
-static bool CollideSpike(const Rectangle& player, const Spike& s) {
-    float tipHeight = s.base.height * 0.72f;
-    float tipWidth = s.base.width * 0.32f;
-    Rectangle baseDanger = s.base;
-    baseDanger.height *= 0.5f;
-    if (!s.up) baseDanger.y = s.base.y + s.base.height * 0.5f;
-
-    Rectangle tipBox;
-    tipBox.width = tipWidth;
-    tipBox.height = tipHeight;
-    tipBox.x = s.base.x + (s.base.width - tipWidth) * 0.5f;
-    tipBox.y = s.up ? (s.base.y - tipHeight + s.base.height) : s.base.y;
-
-    return RectsIntersect(player, baseDanger) || RectsIntersect(player, tipBox);
-}
-
-static void DrawSpike(const Spike& s, float camX) {
-    Vector2 p1 = { s.base.x - camX, s.base.y + s.base.height };
-    Vector2 p2 = { s.base.x + s.base.width - camX, s.base.y + s.base.height };
-    Vector2 p3;
-    if (s.up) p3 = { s.base.x + s.base.width * 0.5f - camX, s.base.y };
-    else      p3 = { s.base.x + s.base.width * 0.5f - camX, s.base.y + s.base.height };
-
-    DrawTriangle(p1, p2, p3, s.color);
-    DrawTriangleLines(p1, p2, p3, Fade(BLACK, 0.15f));
-}
-
-// Background draw
-static void DrawBackground(int screenW, int screenH, const Section& sec, float camX,
-    const vector<ParallaxLayer>& layers, float beatPulse) {
-    DrawRectangleGradientV(0, 0, screenW, screenH, sec.bgA, sec.bgB);
-
-    int bandH = screenH / 8;
-    Color bandColor = { (unsigned char)Clamp(sec.bgB.r + (int)(28 * beatPulse), 0, 255),
-                        (unsigned char)Clamp(sec.bgB.g + (int)(10 * beatPulse), 0, 255),
-                        (unsigned char)Clamp(sec.bgB.b + (int)(36 * beatPulse), 0, 255),
-                        80 };
-    DrawRectangleGradientH(0, screenH / 2 - bandH / 2, screenW, bandH, Fade(bandColor, 0.08f), Fade(bandColor, 0.24f));
-
-    for (const auto& layer : layers) {
-        int count = layer.density;
-        for (int i = 0; i < count; ++i) {
-            float t = (float)i / (float)count;
-            float x = fmodf(camX * layer.speed + t * 9000.0f, (float)screenW) - screenW * 0.5f + t * 140.0f;
-            float y = (sinf(t * 12.1f) * 0.5f + 0.5f) * screenH;
-            float size = layer.scaleMin + (layer.scaleMax - layer.scaleMin) * (0.5f + 0.5f * sinf(t * 7.9f));
-            Color c = Fade(layer.color, 0.22f + 0.16f * beatPulse);
-
-            if ((i + count) % 3 == 0) DrawCircle((int)x, (int)y, size, c);
-            else {
-                Vector2 center = { x, y };
-                Vector2 a = { center.x, center.y - size };
-                Vector2 b = { center.x + size, center.y };
-                Vector2 d = { center.x - size, center.y };
-                Vector2 e = { center.x, center.y + size };
-                DrawTriangle(a, b, d, c);
-                DrawTriangle(b, e, d, c);
-            }
-        }
-    }
-}
 
 // -------------------------
 // Level design parameters
@@ -155,7 +20,6 @@ int main() {
     const int screenH = 720;
     InitWindow(screenW, screenH, "Neon Pulse - Level Redesign (raylib)");
     SetTargetFPS(120);
-
     // Rhythm
     const float BPM = 140.0f;
     const float secondsPerBeat = 60.0f / BPM;
@@ -386,7 +250,7 @@ int main() {
             playerVel.y = 0.0f;
             grounded = true;
         }
-        // ceiling clamp
+        // ceiling Clamp1
         if (player.y <= ceilingYTop) {
             player.y = ceilingYTop;
             if (playerVel.y < 0.0f) playerVel.y = 0.0f;
@@ -551,7 +415,7 @@ int main() {
         // Particles behind player
         for (const auto& prt : particles) {
             Vector2 ppos = { prt.pos.x - camX + shakeX, prt.pos.y + shakeY };
-            DrawCircleV(ppos, prt.size, Fade(prt.color, Clamp(prt.life * 2.5f, 0.0f, 1.0f)));
+            DrawCircleV(ppos, prt.size, Fade(prt.color, Clamp1(prt.life * 2.5f, 0.0f, 1.0f)));
         }
 
         // Player draw
@@ -593,3 +457,6 @@ int main() {
     CloseWindow();
     return 0;
 }
+
+
+
