@@ -1,11 +1,11 @@
 ﻿  background.cpp
   entities.cpp
-C:\Users\makissse\Desktop\NeonPulse1213\src\background\background.cpp(14,41): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-C:\Users\makissse\Desktop\NeonPulse1213\src\background\background.cpp(15,41): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-C:\Users\makissse\Desktop\NeonPulse1213\src\background\background.cpp(16,41): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\makissse\Documents\GitHub\NeonPulse\NeonPulse\src\background\background.cpp(18,41): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\makissse\Documents\GitHub\NeonPulse\NeonPulse\src\background\background.cpp(19,41): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+C:\Users\makissse\Documents\GitHub\NeonPulse\NeonPulse\src\background\background.cpp(20,41): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
   main.cpp
   utils.cpp
   Создание кода...
-  NeonPulse.vcxproj -> C:\Users\makissse\Desktop\NeonPulse1213\x64\Debug\NeonPulse.exe
+  NeonPulse.vcxproj -> C:\Users\makissse\Documents\GitHub\NeonPulse\x64\Debug\NeonPulse.exe
   "pwsh.exe" не является внутренней или внешней
   командой, исполняемой программой или пакетным файлом.
