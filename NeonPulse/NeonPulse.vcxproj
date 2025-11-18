@@ -144,12 +144,14 @@
   <ItemGroup>
     <ClCompile Include="src\background\background.cpp" />
     <ClCompile Include="src\entities\entities.cpp" />
+    <ClCompile Include="src\level\level.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\utils\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\background\background.h" />
     <ClInclude Include="src\entities\entities.h" />
+    <ClInclude Include="src\level\level.h" />
     <ClInclude Include="src\utils\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -17,6 +17,17 @@ struct MovingPlatform {
     Rectangle GetRect(float t) const;
 };
 
+struct GhostPlatform {
+    Rectangle base;
+    float amplitude;
+    float speed;
+    bool vertical;
+    Color color;
+    float phase;
+
+    Rectangle GetRect(float t) const;
+};
+
 struct Spike {
     Rectangle base;
     bool up;

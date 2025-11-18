@@ -15,6 +15,15 @@ Rectangle MovingPlatform::GetRect(float t) const {
     return r;
 }
 
+Rectangle GhostPlatform::GetRect(float t) const {
+    // Same motion logic as MovingPlatform, but used only for visuals
+    Rectangle r = base;
+    float offset = amplitude * sinf(phase + t * speed * 2.0f * PI);
+    if (vertical) r.y += offset;
+    else r.x += offset;
+    return r;
+}
+
 // -------------------------
 // Spike collision
 // -------------------------

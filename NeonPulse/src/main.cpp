@@ -9,6 +9,7 @@
 #include "utils/utils.h"
 #include "entities/entities.h"
 #include "background/background.h"
+#include "level/level.h" 
 
 using namespace std;
 
@@ -45,8 +46,15 @@ int main() {
     float speedTimer = 0.0f;
     float speedMultiplierActive = 1.0f;
 
+    // Start / respawn menus
+    bool inStartMenu = true;     // start in main menu
+    float respawnHold = 0.0f;    // 0..1 hold progress for respawn
+    const float respawnFillSpeed = 0.4f;   // how fast bar fills while holding R
+    const float respawnDecaySpeed = 2.4f;  // how fast bar empties when released
+
     // Camera
     float camX = 0.0f;
+
 
     // Floor & ceiling
     const float defaultFloorY = 560.0f;
@@ -59,13 +67,15 @@ int main() {
     Color neonGreen = { 50, 255, 160, 255 };
     Color neonBlue = { 60, 160, 255, 255 };
     Color neonPurple = { 170, 60, 255, 255 };
+    Color neonRed = { 255, 49, 49, 255 };
 
     // Sections (visual)
     vector<Section> sections = {
         { 0.0f,     1200.0f,  { 20, 30, 60, 255 }, { 40, 10, 80, 255 } },
         { 1200.0f,  2600.0f,  { 10, 50, 80, 255 }, { 0, 20, 40, 255 } },
         { 2600.0f,  4200.0f,  { 10, 10, 40, 255 }, { 40, 0, 60, 255 } },
-        { 4200.0f,  7600.0f,  { 8, 12, 26, 255  }, { 18, 26, 64, 255 } },
+        { 4200.0f,  18350.0f,  { 8, 12, 26, 255  }, { 18, 26, 64, 255 } },
+        { 18350.0f, 29000.0f,  { 80, 0, 0, 255 }, { 180, 0, 0, 255 } }
     };
 
     // Parallax layers
@@ -81,13 +91,9 @@ int main() {
     vector<Arch> arches;
     vector<JumpPad> jumpPads;
     vector<SpeedPad> speedPads;
+    vector<GhostPlatform> ghostPlatforms;
 
-    // GravityPad (local helper)
-    struct GravityPad {
-        Rectangle rect;
-        Color color;
-        bool flipsUp;
-    };
+    // GravityPad
     vector<GravityPad> gravityPads;
 
     // helper to add spike clusters
@@ -100,96 +106,73 @@ int main() {
      };
 
 
-    // --- Intro: tutorial ---
-    {
-        addSpikeClusterLocal(900.0f, 1, 36.0f, 56.0f, true, neonYellow);
-        addSpikeClusterLocal(1300.0f, 2, 36.0f, 56.0f, true, neonYellow);
-    }
 
-    // --- Easy rhythm (small hops) ---
-    {
-        platforms.push_back({ { 1780,  defaultFloorY - 72, 140, 20 }, 0, 0.0f, false, neonGreen, 0.0f });
-        platforms.push_back({ { 2060,  defaultFloorY - 84, 140, 20 }, 0, 0.0f, false, neonCyan, 0.0f });
-        platforms.push_back({ { 2340, defaultFloorY - 100, 140, 20 }, 0, 0.0f, false, neonMagenta, 0.0f });
+    //speedPads.push_back({ { 900, defaultFloorY - 8, 66, 8 }, 5.5f, 7.0f, neonGreen });
+    Rectangle finishLine{}; // will be filled by BuildLevel
 
-        // small, single spike intro
-        addSpikeClusterLocal(2200.0f, 2, 36.0f, 56.0f, true, neonYellow);
-    }
-
-
-
-    // --- Beat Hop: consistent spacing, one intended path ---
-    {
-        float beatGap = 180.0f; // shorter spacing for easier planning
-        float beatStart = 2620.0f;
-        for (int i = 0; i < 8; ++i) {
-            // small vertical oscillation but intentionally small so path is predictable
-            float yOff = (i % 2 == 0) ? -128.0f : -140.0f;
-            Color c = (i % 2 == 0) ? neonBlue : neonPurple;
-            platforms.push_back({ { beatStart + i * beatGap, defaultFloorY + yOff, 110, 18 }, 0.0f, 0.0f, false, c, 0.0f });
-        }
-        for (int i = 0; i < 8; ++i) {
-            // center the spike cluster in the gap between platforms
-            float gapCenterX = beatStart + i * beatGap - beatGap * 0.5f;
-            // place 3 upward-facing spikes covering the gap
-            addSpikeClusterLocal(gapCenterX - 16.0f, 6, 34.0f, 60.0f, true, neonMagenta);
-        }
-    }
-
-    // --- Speedlaunch (short boost into a simple chain) ---
-    {
-        speedPads.push_back({ { 4100, defaultFloorY - 8, 66, 8 }, 1.35f, 0.9f, neonGreen });
-        platforms.push_back({ { 4260, defaultFloorY - 120, 160, 20 }, 0.0f, 0.0f, false, neonCyan, 0.0f });
-    }
-
-    // --- Gravity Flip segment: flip gravity, run on ceiling over a fixed distance ---
-    { 
-        // place a GravityPad that flips gravity to inverted
-        gravityPads.push_back({ { 4520.0f, defaultFloorY - 24, 56, 16 }, neonPurple, true});
-
-     // Ceiling platforms (intended path while gravity inverted) - placed near the ceiling
-        float ceilingStart = 4660.0f;
-
-        for (int i = 1; i < 6; i++) {
-            float x = ceilingStart + i * 300.0f - i * i / 2 * 8;
-            addSpikeClusterLocal(x, 4, 35.0f, 50.0f, false, neonMagenta);
-        }
-
-        addSpikeClusterLocal(ceilingStart - 40.0f, 30, 36.0f, 70.0f, true, neonYellow);
-
-        // GravityPad to flip back to normal gravity after the ceiling run
-        gravityPads.push_back({ { ceilingStart + 8.5f * 200.0f, ceilingYTop + 6.0f, 56, 16 }, neonPurple, false});
-
-        addSpikeClusterLocal(ceilingStart + 10.0f * 200.0f, 8, 36.0f, 70.0f, false, neonYellow);
-    }
-
-    
-
-    // --- Jumpad trick ---
-    {
-        float trickStart = 6800.0f;
-        platforms.push_back({ { trickStart + 475.0f,  defaultFloorY - 84, 140, 20 }, 0, 0.0f, false, neonCyan, 0.0f });
-        jumpPads.push_back({ { trickStart + 400.0f, defaultFloorY - 32, 60, 16 }, 1.45f, neonYellow });
-        addSpikeClusterLocal(trickStart + 675.0f, 4, 36.0f, 70.0f, true, neonBlue);
-    }
-
-    // --- Fianl Jump ---
-    {
-        float finalStart = 7700.0f;
-        speedPads.push_back({ { finalStart + 475.0f, defaultFloorY - 8, 66, 8 }, 1.35f, 2.0f, neonGreen });
-        addSpikeClusterLocal(finalStart + 675.0f, 6, 34.0f, 70.0f, true, neonMagenta);
-    }
+    BuildLevel(
+        platforms,
+        ghostPlatforms,
+        spikes,
+        jumpPads,
+        speedPads,
+        gravityPads,
+        finishLine,
+        defaultFloorY,
+        ceilingYTop,
+        neonCyan,
+        neonMagenta,
+        neonYellow,
+        neonGreen,
+        neonBlue,
+        neonPurple,
+        neonRed
+    );
 
 
-    // Finish zone
-    Rectangle finishLine = { 9100.0f, 0.0f, 8.0f, (float)screenH };
+        // Particle container
+        vector<Particle> particles;
+        particles.reserve(400);
 
-    // Particle container
-    vector<Particle> particles;
-    particles.reserve(400);
+        // Helper: reset full game state for a new run
+        auto ResetRun = [&]() {
+            // reset player core state
+            player = { 100, 520, 36, 36 };
+            playerVel = { 0.0f, 0.0f };
+            grounded = false;
+            alive = true;
 
-    // Beat pulse function
-    auto BeatPulse = [&](float t) {
+            // reset camera and timing
+            camX = 0.0f;
+            songTime = 0.0f;
+            deathShake = 0.0f;
+
+            // clear particles
+            particles.clear();
+
+            // reset speed to default
+            baseRunSpeed = baseRunSpeedDefault;
+            runSpeed = baseRunSpeedDefault;
+            speedTimer = 0.0f;
+            speedMultiplierActive = 1.0f;
+
+            // auto-jump flags
+            holdJumpActive = false;
+            prevGrounded = false;
+
+            // gravity state
+            gravityDir = 1;
+            gravityFlipTimer = 0.0f;
+
+            // level state
+            levelFinished = false;
+
+            // respawn bar
+            respawnHold = 0.0f;
+            };
+
+        // Beat pulse function
+        auto BeatPulse = [&](float t) {
         float beat = fmodf(t, secondsPerBeat);
         return expf(-6.0f * beat);
         };
@@ -208,32 +191,78 @@ int main() {
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         songTime += dt;
+        float pulse = BeatPulse(songTime); // global pulse for this frame
 
-        // Restart if dead
-        if (!alive && IsKeyPressed(KEY_R) || (levelFinished && IsKeyPressed(KEY_R))) {
-            player = { 100, 520, 36, 36 };
-            playerVel = { 0.0f, 0.0f };
-            grounded = false;
-            alive = true;
-            camX = 0.0f;
-            songTime = 0.0f;
-            deathShake = 0.0f;
-            particles.clear();
-            runSpeed = baseRunSpeedDefault;
-            baseRunSpeed = baseRunSpeedDefault;
-            speedTimer = 0.0f;
-            speedMultiplierActive = 1.0f;
+        if (inStartMenu) {
+            // --- Start game input: ENTER or mouse click on big PLAY button ---
 
-            // reset auto-jump flags
-            holdJumpActive = false;
-            prevGrounded = false;
+            // button geometry
+            int btnW = 260;
+            int btnH = 80;
+            int btnX = screenW / 2 - btnW / 2;
+            int btnY = screenH / 2;
 
-            // reset gravity state on restart
-            gravityDir = 1;             // restore normal gravity
-            gravityFlipTimer = 0.0f;   // clear any flip cooldown
+            Rectangle playButton = { (float)btnX, (float)btnY, (float)btnW, (float)btnH };
 
-            levelFinished = false;
+            Vector2 mouse = GetMousePosition();
+            bool hovered = CheckCollisionPointRec(mouse, playButton);
+            bool clicked = hovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+
+            // start only with ENTER or clicking PLAY
+            if (IsKeyPressed(KEY_ENTER) || clicked) {
+                ResetRun();        // reset all game state
+                inStartMenu = false;
+            }
+
+            BeginDrawing();
+            ClearBackground(BLACK);
+
+            // animated background even in menu
+            Section sec = CurrentSection(camX + screenW * 0.5f);
+            DrawBackground(screenW, screenH, sec, camX, layers, pulse);
+
+            // title
+            const char* title = "NEON PULSE";
+            int titleSize = 64;
+            int tw = MeasureText(title, titleSize);
+            DrawText(title,
+                screenW / 2 - tw / 2,
+                screenH / 4,
+                titleSize,
+                Fade(WHITE, 0.95f));
+
+            // big PLAY button
+            Color btnFill = hovered ? Fade(neonGreen, 0.95f) : Fade(neonCyan, 0.85f);
+            Color btnBorder = Fade(WHITE, 0.9f);
+            DrawRectangleRounded(playButton, 0.25f, 10, btnFill);
+            DrawRectangleLinesEx(playButton, 3.0f, btnBorder);
+
+            const char* playText = "PLAY";
+            int playSize = 32;
+            int pw = MeasureText(playText, playSize);
+            DrawText(playText,
+                screenW / 2 - pw / 2,
+                btnY + btnH / 2 - playSize / 2,
+                playSize,
+                Fade(BLACK, 0.9f));
+
+            // hint text
+            const char* pressMsg = "Press ENTER or click PLAY";
+            int msgSize = 20;
+            int mw = MeasureText(pressMsg, msgSize);
+            DrawText(pressMsg,
+                screenW / 2 - mw / 2,
+                btnY + btnH + 40,
+                msgSize,
+                Fade(WHITE, 0.85f));
+
+            EndDrawing();
+            continue;   // skip gameplay while in start menu
         }
+
+
+
+
 
         // Input: jump
         if (alive) {
@@ -326,7 +355,6 @@ int main() {
         }
 
         // Moving platforms collision + resolve
-        float pulse = BeatPulse(songTime);
         float tPhase = songTime + pulse * 0.03f;
         for (auto& p : platforms) {
             Rectangle pr = p.GetRect(tPhase);
@@ -386,6 +414,7 @@ int main() {
                         player.x = pr.x + pr.width;
                     }
                 }
+
             }
         }
 
@@ -509,9 +538,41 @@ int main() {
                 }
             }
         }
+        // Respawn / restart hold-to-retry logic
+        // Active whenever the run is over: on death OR after level completion.
+        bool showRespawnMenu = (!alive || levelFinished);
+        if (showRespawnMenu) {
+            bool holdingR = IsKeyDown(KEY_R);
+
+            if (holdingR) {
+                // fill progress bar while R is held
+                respawnHold += respawnFillSpeed * dt;
+            }
+            else {
+                // decay progress when R is released
+                respawnHold -= respawnDecaySpeed * dt;
+            }
+
+            if (respawnHold < 0.0f) respawnHold = 0.0f;
+            if (respawnHold > 1.0f) respawnHold = 1.0f;
+
+            // when bar is full -> restart the run
+            if (respawnHold >= 1.0f) {
+                ResetRun();
+                inStartMenu = false; // go straight back into gameplay
+                respawnHold = 0.0f;
+            }
+        }
+        else {
+            // no respawn menu -> let bar smoothly fall back to zero
+            respawnHold -= respawnDecaySpeed * dt;
+            if (respawnHold < 0.0f) respawnHold = 0.0f;
+        }
+
 
         // Camera follows player
         camX = player.x - 280.0f;
+
 
         // Particles update & cleanup
         for (int i = (int)particles.size() - 1; i >= 0; --i) {
@@ -594,7 +655,7 @@ int main() {
         }
 
 
-        // Moving platforms
+        // Patforms
         for (const auto& p : platforms) {
             Rectangle r = p.GetRect(tPhase);
             if (r.x + r.width - camX < -160 || r.x - camX > screenW + 160) continue;
@@ -605,6 +666,19 @@ int main() {
             DrawRectangleLinesEx(drawR, 3.0f, edge);
             DrawRectangle((int)drawR.x, (int)(drawR.y + drawR.height), (int)drawR.width, 6, Fade(p.color, 0.28f));
         }
+
+        // Ghost platforms
+        for (const auto& gp : ghostPlatforms) {
+            Rectangle r = gp.GetRect(tPhase);
+            if (r.x + r.width - camX < -160 || r.x - camX > screenW + 160) continue;
+            Rectangle drawR = { r.x - camX + shakeX, r.y + shakeY, r.width, r.height };
+            Color fill = Fade(gp.color, 0.45f + 0.28f * pulse);
+            Color edge = Fade(gp.color, 0.96f);
+            DrawRectangleRounded(drawR, 0.18f, 6, fill);
+            DrawRectangleLinesEx(drawR, 3.0f, edge);
+            DrawRectangle((int)drawR.x, (int)(drawR.y + drawR.height), (int)drawR.width, 6, Fade(gp.color, 0.28f));
+        }
+
 
         // Spikes
         for (const auto& s : spikes) {
@@ -641,29 +715,147 @@ int main() {
         // HUD
         DrawText("Neon Pulse", 24, 20, 28, Fade(WHITE, 0.9f));
         DrawText(TextFormat("BPM: %.0f", BPM), 24, 56, 20, Fade(WHITE, 0.6f));
-        DrawText("Jump: Space/Up | Restart: R", 24, 84, 18, Fade(WHITE, 0.6f));
+        DrawText("Jump: Space/Up | Retry: hold R", 24, 84, 18, Fade(WHITE, 0.6f));
+
 
         if (speedTimer > 0.0f) {
             DrawText(TextFormat("SPEED x%.2f (%.1fs)", speedMultiplierActive, speedTimer), 24, 108, 18, Fade(neonGreen, 0.9f));
         }
+        // Unified overlay for death and level completion (same visuals, different text)
+        if (!alive || levelFinished) {
+            // darken the whole screen
+            DrawRectangle(0, 0, screenW, screenH, Fade(BLACK, 0.65f));
 
-        if (!alive && !levelFinished) {
-            const char* crashMsg = "Crashed! Press R to retry";
-            int tw = MeasureText(crashMsg, 30);
-            DrawText(crashMsg, screenW / 2 - tw / 2, screenH / 2 - 16, 30, Fade(WHITE, 0.9f));
+            // center story panel
+            int panelW = (int)(screenW * 0.6f);
+            int panelH = (int)(screenH * 0.4f);
+            int panelX = screenW / 2 - panelW / 2;
+            int panelY = screenH / 2 - panelH / 2;
+
+            Rectangle panelRect = { (float)panelX, (float)panelY, (float)panelW, (float)panelH };
+
+            // same visual style for both death and victory overlay
+            DrawRectangleRounded(panelRect, 0.08f, 12, Fade(neonRed, 0.85f));
+            DrawRectangleLinesEx(panelRect, 3.0f, Fade(WHITE, 0.9f));
+
+            // choose texts based on game state
+            const char* titleText;
+            const char* storyMsg;
+            const char* holdText;
+
+            // Unified overlay for death and level completion (same layout, different text)
+            if (!alive || levelFinished) {
+                // darken the whole screen
+                DrawRectangle(0, 0, screenW, screenH, Fade(BLACK, 0.65f));
+
+                // larger story panel for long narrative text
+                int panelW = (int)(screenW * 0.7f);   // a bit wider
+                int panelH = (int)(screenH * 0.6f);   // much taller for more text
+                int panelX = screenW / 2 - panelW / 2;
+                int panelY = screenH / 2 - panelH / 2;
+
+                Rectangle panelRect = { (float)panelX, (float)panelY, (float)panelW, (float)panelH };
+
+                // panel color: neutral dark with cyan outline (fits the general palette)
+                Color panelFill = { 8, 10, 24, 235 }; // dark blue-ish, almost black
+                DrawRectangleRounded(panelRect, 0.08f, 12, panelFill);
+                DrawRectangleLinesEx(panelRect, 3.0f, Fade(neonCyan, 0.9f));
+
+                // choose texts based on game state
+                const char* titleText;
+                const char* storyMsg;
+                const char* holdText;
+                Color titleColor;
+
+                // Unified overlay for death and level completion (same layout, different text)
+                if (!alive || levelFinished) {
+                    // darken the whole screen
+                    DrawRectangle(0, 0, screenW, screenH, Fade(BLACK, 0.65f));
+
+                    // large story panel (almost full screen height)
+                    int panelW = (int)(screenW * 0.8f);    // wide panel
+                    int panelH = (int)(screenH * 0.85f);   // very tall panel
+                    int panelX = screenW / 2 - panelW / 2;
+                    int panelY = screenH / 2 - panelH / 2;
+
+                    Rectangle panelRect = { (float)panelX, (float)panelY, (float)panelW, (float)panelH };
+
+                    // panel color: dark neutral to keep contrast for text
+                    Color panelFill = { 8, 10, 24, 235 }; // dark blue-ish background
+                    DrawRectangleRounded(panelRect, 0.08f, 12, panelFill);
+                    DrawRectangleLinesEx(panelRect, 3.0f, Fade(neonCyan, 0.9f));
+
+                    // choose texts based on game state
+                    const char* titleText;
+                    const char* storyMsg;
+                    const char* holdText;
+                    Color titleColor;
+
+                    if (!alive && !levelFinished) {
+                        // death case
+                        titleText = "YOU DIED";
+                        storyMsg = "Story text will be shown here after each death.";
+                        holdText = "Hold R to respawn";
+                        titleColor = neonRed;      // red only for the title
+                    }
+                    else {
+                        // level finished case
+                        titleText = "LEVEL COMPLETE";
+                        storyMsg = "Outro text will be shown here after finishing the level.";
+                        holdText = "Hold R to restart";
+                        titleColor = neonGreen;    // victory color
+                    }
+
+                    // title
+                    int titleSize = 32;
+                    int tw = MeasureText(titleText, titleSize);
+                    DrawText(titleText,
+                        screenW / 2 - tw / 2,
+                        panelY + 24,
+                        titleSize,
+                        titleColor);
+
+                    // story text area (later you can replace this with DrawTextRec for long paragraphs)
+                    int storySize = 22;
+                    int storyY = panelY + 80;
+                    int sw = MeasureText(storyMsg, storySize);
+                    DrawText(storyMsg,
+                        screenW / 2 - sw / 2,
+                        storyY,
+                        storySize,
+                        Fade(WHITE, 0.95f));
+
+                    // respawn / restart progress bar inside panel
+                    int barW = (int)(panelW * 0.6f);
+                    int barH = 26;
+                    int barX = screenW / 2 - barW / 2;
+                    int barY = panelY + panelH - barH - 70; // a bit above bottom edge
+
+                    Rectangle barBg = { (float)barX, (float)barY, (float)barW, (float)barH };
+                    DrawRectangleRounded(barBg, 0.3f, 8, Fade(BLACK, 0.7f));
+                    DrawRectangleLinesEx(barBg, 2.0f, Fade(WHITE, 0.8f));
+
+                    Rectangle barFill = {
+                        (float)barX,
+                        (float)barY,
+                        (float)(barW * respawnHold),
+                        (float)barH
+                    };
+                    DrawRectangleRounded(barFill, 0.3f, 8, Fade(neonGreen, 0.95f));
+
+                    // hold R text above bar
+                    int htSize = 20;
+                    int htW = MeasureText(holdText, htSize);
+                    DrawText(holdText,
+                        screenW / 2 - htW / 2,
+                        barY - 32,
+                        htSize,
+                        Fade(WHITE, 0.9f));
+                }
+            }
+
+
         }
-
-
-        if (levelFinished) {
-            const char* msg = "LEVEL COMPLETE!";
-            int fw = MeasureText(msg, 50);
-            DrawText(msg, screenW / 2 - fw / 2, screenH / 3, 50, Fade(neonGreen, 0.95f));
-
-            const char* sub = "Press R to restart";
-            int sw = MeasureText(sub, 24);
-            DrawText(sub, screenW / 2 - sw / 2, screenH / 3 + 60, 24, Fade(WHITE, 0.8f));
-        }
-
 
         EndDrawing();
 
