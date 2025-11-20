@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-// Local helper to add spike clusters (copied from main.cpp)
+// Local helper to add spike clusters
 static void AddSpikeCluster(
     std::vector<Spike>& spikes,
     float startX,
@@ -126,7 +126,7 @@ void BuildLevel(
     {
         float longJump = 7700.0f;
         speedPads.push_back({ { longJump + 475.0f, defaultFloorY - 8, 66, 8 }, 1.35f, 2.0f, neonGreen });
-        AddSpikeCluster(spikes, longJump + 675.0f, 6, 34.0f, 40.0f, true,
+        AddSpikeCluster(spikes, longJump + 675.0f, 6, 34.0f, 70.0f, true,
             neonMagenta, defaultFloorY, ceilingYTop);
     }
 
@@ -200,7 +200,7 @@ void BuildLevel(
         speedPads.push_back({ { tstart, defaultFloorY - 8, 66, 8 }, 0.7f, 8.0f, neonBlue });
         for (int i = 0; i < 16; i++) {
             sx += 150.0f - 6.6f * i / 2;
-            AddSpikeCluster(spikes, sx, 2, 34.0f, 40.0f, (i % 2 == 0),
+            AddSpikeCluster(spikes, sx, 2, 34.0f, 69.0f, (i % 2 == 0),
                 neonYellow, defaultFloorY, ceilingYTop);
         }
     }

@@ -18,6 +18,51 @@ int main() {
     const int screenW = 1280;
     const int screenH = 720;
     InitWindow(screenW, screenH, "Neon Pulse");
+
+    // --- AUDIO INIT ---
+    InitAudioDevice(); // Initialize audio device for music and sounds
+
+    // Load menu ambient music (looped)
+    Music menuMusic = LoadMusicStream("audio/menu_ambient.mp3");
+    menuMusic.looping = true;
+    SetMusicVolume(menuMusic, 0.3f); // Adjust volume to taste
+
+    // Load main level music (looped)
+    Music levelMusic = LoadMusicStream("audio/level_theme.mp3");
+    levelMusic.looping = true;
+    SetMusicVolume(levelMusic, 0.4f); // Adjust volume to taste
+
+    // At game start we are in menu, so start menu music immediately
+    PlayMusicStream(menuMusic);
+    bool menuMusicPlaying = true;
+    bool levelMusicPlaying = false;
+
+    auto SwitchToMenuMusic = [&]() {
+        // Stop level music if it is playing and switch to ambient
+        if (levelMusicPlaying) {
+            StopMusicStream(levelMusic);
+            levelMusicPlaying = false;
+        }
+        if (!menuMusicPlaying) {
+            // Start or resume ambient menu music
+            PlayMusicStream(menuMusic);
+            menuMusicPlaying = true;
+        }
+        };
+
+    auto SwitchToLevelMusicRestart = [&]() {
+        // Switch from ambient to level music and always restart track from the beginning
+        if (menuMusicPlaying) {
+            StopMusicStream(menuMusic);
+            menuMusicPlaying = false;
+        }
+
+        // Ensure level track starts from time 0
+        StopMusicStream(levelMusic);   // reset playback position
+        PlayMusicStream(levelMusic);   // start playing from the beginning
+        levelMusicPlaying = true;
+        };
+
     SetTargetFPS(120);
     // Rhythm
     const float BPM = 140.0f;
@@ -39,8 +84,14 @@ int main() {
     const float jumpVelBase = -760.0f; // base jump velocity; multiply by gravityDir for effective jump
     int gravityDir = 1; // 1 = normal (gravity pulls down), -1 = inverted (gravity pulls up)
     float gravityFlipTimer = 0.0f; // gravity flip cooldown (prevents immediate re-flip while overlapping a gravity pad)
+    
+    // Level
     const float gravityFlipCooldown = 0.35f; // seconds
     bool levelFinished = false;
+    float endScreenTimer = 0.0f;          // how long we have been in "run over" state
+    const float endScreenDelay = 1.5f;    // delay before showing overlay, seconds
+    bool overlayMusicStarted = false;     // true when ambient for respawn/finish menu has been started
+
 
     // SpeedPad state
     float speedTimer = 0.0f;
@@ -169,6 +220,9 @@ int main() {
 
             // respawn bar
             respawnHold = 0.0f;
+
+            // end screen delay timer
+            endScreenTimer = 0.0f;
             };
 
         // Beat pulse function
@@ -193,6 +247,14 @@ int main() {
         songTime += dt;
         float pulse = BeatPulse(songTime); // global pulse for this frame
 
+        // Update only currently playing music streams
+        if (menuMusicPlaying) {
+            UpdateMusicStream(menuMusic); // Keep streaming menu ambient
+        }
+        if (levelMusicPlaying) {
+            UpdateMusicStream(levelMusic); // Keep streaming level music
+        }
+
         if (inStartMenu) {
             // --- Start game input: ENTER or mouse click on big PLAY button ---
 
@@ -212,6 +274,10 @@ int main() {
             if (IsKeyPressed(KEY_ENTER) || clicked) {
                 ResetRun();        // reset all game state
                 inStartMenu = false;
+
+                // --- MUSIC SWITCH: MENU -> LEVEL (RESTART TRACK) ---
+                SwitchToLevelMusicRestart();
+                // --- END MUSIC SWITCH ---
             }
 
             BeginDrawing();
@@ -489,6 +555,7 @@ int main() {
             // Stop player movement
             playerVel = { 0, 0 };
 
+
             // Victory particles
             for (int i = 0; i < 60; ++i) {
                 float ang = (float)GetRandomValue(0, 360) * DEG2RAD;
@@ -511,10 +578,13 @@ int main() {
                 if (CollideSpike(player, s)) {
                     alive = false;
                     deathShake = 8.0f;
+
+                    // Music will change when respawn menu overlay appears.
                     break;
                 }
             }
         }
+
 
 		// Auto-jump on landing
         if (alive) {
@@ -539,35 +609,52 @@ int main() {
             }
         }
         // Respawn / restart hold-to-retry logic
-        // Active whenever the run is over: on death OR after level completion.
-        bool showRespawnMenu = (!alive || levelFinished);
-        if (showRespawnMenu) {
-            bool holdingR = IsKeyDown(KEY_R);
+        bool runOver = (!alive || levelFinished);
 
-            if (holdingR) {
-                // fill progress bar while R is held
-                respawnHold += respawnFillSpeed * dt;
+        if (runOver) {
+            // Increase end-screen timer while we stay in this state
+            endScreenTimer += dt;
+
+            // Only allow Hold-R and bar after delay
+            if (endScreenTimer >= endScreenDelay) {
+                bool holdingR = IsKeyDown(KEY_R);
+
+                if (holdingR) {
+                    // Fill progress bar while R is held
+                    respawnHold += respawnFillSpeed * dt;
+                }
+                else {
+                    // Decay progress when R is released
+                    respawnHold -= respawnDecaySpeed * dt;
+                }
+
+                // Clamp progress to [0, 1]
+                if (respawnHold < 0.0f) respawnHold = 0.0f;
+                if (respawnHold > 1.0f) respawnHold = 1.0f;
+
+                // When bar is full -> restart the run
+                if (respawnHold >= 1.0f) {
+                    ResetRun();
+                    inStartMenu = false;  // go straight back into gameplay
+                    respawnHold = 0.0f;
+
+                    SwitchToLevelMusicRestart();
+                }
             }
             else {
-                // decay progress when R is released
+                // During delay we do not want any leftover fill
                 respawnHold -= respawnDecaySpeed * dt;
-            }
-
-            if (respawnHold < 0.0f) respawnHold = 0.0f;
-            if (respawnHold > 1.0f) respawnHold = 1.0f;
-
-            // when bar is full -> restart the run
-            if (respawnHold >= 1.0f) {
-                ResetRun();
-                inStartMenu = false; // go straight back into gameplay
-                respawnHold = 0.0f;
+                if (respawnHold < 0.0f) respawnHold = 0.0f;
             }
         }
         else {
-            // no respawn menu -> let bar smoothly fall back to zero
+            // While run is active, timer stays at zero and bar drains
+            endScreenTimer = 0.0f;
             respawnHold -= respawnDecaySpeed * dt;
             if (respawnHold < 0.0f) respawnHold = 0.0f;
         }
+
+
 
 
         // Camera follows player
@@ -721,141 +808,99 @@ int main() {
         if (speedTimer > 0.0f) {
             DrawText(TextFormat("SPEED x%.2f (%.1fs)", speedMultiplierActive, speedTimer), 24, 108, 18, Fade(neonGreen, 0.9f));
         }
-        // Unified overlay for death and level completion (same visuals, different text)
-        if (!alive || levelFinished) {
+        // Unified overlay for death and level completion (same layout, different text)
+        if ((!alive || levelFinished) && endScreenTimer >= endScreenDelay) {
+            
+            if (!overlayMusicStarted) {
+                // This will stop level track and start menu ambient
+                SwitchToMenuMusic();
+                overlayMusicStarted = true;
+            }
+
             // darken the whole screen
             DrawRectangle(0, 0, screenW, screenH, Fade(BLACK, 0.65f));
 
-            // center story panel
-            int panelW = (int)(screenW * 0.6f);
-            int panelH = (int)(screenH * 0.4f);
+            // large story panel (almost full screen height)
+            int panelW = (int)(screenW * 0.8f);    // wide panel
+            int panelH = (int)(screenH * 0.85f);   // very tall panel
             int panelX = screenW / 2 - panelW / 2;
             int panelY = screenH / 2 - panelH / 2;
 
             Rectangle panelRect = { (float)panelX, (float)panelY, (float)panelW, (float)panelH };
 
-            // same visual style for both death and victory overlay
-            DrawRectangleRounded(panelRect, 0.08f, 12, Fade(neonRed, 0.85f));
-            DrawRectangleLinesEx(panelRect, 3.0f, Fade(WHITE, 0.9f));
+            // panel color: dark neutral to keep contrast for text
+            Color panelFill = { 8, 10, 24, 235 }; // dark blue-ish background
+            DrawRectangleRounded(panelRect, 0.08f, 12, panelFill);
+            DrawRectangleLinesEx(panelRect, 3.0f, Fade(neonCyan, 0.9f));
 
             // choose texts based on game state
             const char* titleText;
             const char* storyMsg;
             const char* holdText;
+            Color titleColor;
 
-            // Unified overlay for death and level completion (same layout, different text)
-            if (!alive || levelFinished) {
-                // darken the whole screen
-                DrawRectangle(0, 0, screenW, screenH, Fade(BLACK, 0.65f));
-
-                // larger story panel for long narrative text
-                int panelW = (int)(screenW * 0.7f);   // a bit wider
-                int panelH = (int)(screenH * 0.6f);   // much taller for more text
-                int panelX = screenW / 2 - panelW / 2;
-                int panelY = screenH / 2 - panelH / 2;
-
-                Rectangle panelRect = { (float)panelX, (float)panelY, (float)panelW, (float)panelH };
-
-                // panel color: neutral dark with cyan outline (fits the general palette)
-                Color panelFill = { 8, 10, 24, 235 }; // dark blue-ish, almost black
-                DrawRectangleRounded(panelRect, 0.08f, 12, panelFill);
-                DrawRectangleLinesEx(panelRect, 3.0f, Fade(neonCyan, 0.9f));
-
-                // choose texts based on game state
-                const char* titleText;
-                const char* storyMsg;
-                const char* holdText;
-                Color titleColor;
-
-                // Unified overlay for death and level completion (same layout, different text)
-                if (!alive || levelFinished) {
-                    // darken the whole screen
-                    DrawRectangle(0, 0, screenW, screenH, Fade(BLACK, 0.65f));
-
-                    // large story panel (almost full screen height)
-                    int panelW = (int)(screenW * 0.8f);    // wide panel
-                    int panelH = (int)(screenH * 0.85f);   // very tall panel
-                    int panelX = screenW / 2 - panelW / 2;
-                    int panelY = screenH / 2 - panelH / 2;
-
-                    Rectangle panelRect = { (float)panelX, (float)panelY, (float)panelW, (float)panelH };
-
-                    // panel color: dark neutral to keep contrast for text
-                    Color panelFill = { 8, 10, 24, 235 }; // dark blue-ish background
-                    DrawRectangleRounded(panelRect, 0.08f, 12, panelFill);
-                    DrawRectangleLinesEx(panelRect, 3.0f, Fade(neonCyan, 0.9f));
-
-                    // choose texts based on game state
-                    const char* titleText;
-                    const char* storyMsg;
-                    const char* holdText;
-                    Color titleColor;
-
-                    if (!alive && !levelFinished) {
-                        // death case
-                        titleText = "YOU DIED";
-                        storyMsg = "Story text will be shown here after each death.";
-                        holdText = "Hold R to respawn";
-                        titleColor = neonRed;      // red only for the title
-                    }
-                    else {
-                        // level finished case
-                        titleText = "LEVEL COMPLETE";
-                        storyMsg = "Outro text will be shown here after finishing the level.";
-                        holdText = "Hold R to restart";
-                        titleColor = neonGreen;    // victory color
-                    }
-
-                    // title
-                    int titleSize = 32;
-                    int tw = MeasureText(titleText, titleSize);
-                    DrawText(titleText,
-                        screenW / 2 - tw / 2,
-                        panelY + 24,
-                        titleSize,
-                        titleColor);
-
-                    // story text area (later you can replace this with DrawTextRec for long paragraphs)
-                    int storySize = 22;
-                    int storyY = panelY + 80;
-                    int sw = MeasureText(storyMsg, storySize);
-                    DrawText(storyMsg,
-                        screenW / 2 - sw / 2,
-                        storyY,
-                        storySize,
-                        Fade(WHITE, 0.95f));
-
-                    // respawn / restart progress bar inside panel
-                    int barW = (int)(panelW * 0.6f);
-                    int barH = 26;
-                    int barX = screenW / 2 - barW / 2;
-                    int barY = panelY + panelH - barH - 70; // a bit above bottom edge
-
-                    Rectangle barBg = { (float)barX, (float)barY, (float)barW, (float)barH };
-                    DrawRectangleRounded(barBg, 0.3f, 8, Fade(BLACK, 0.7f));
-                    DrawRectangleLinesEx(barBg, 2.0f, Fade(WHITE, 0.8f));
-
-                    Rectangle barFill = {
-                        (float)barX,
-                        (float)barY,
-                        (float)(barW * respawnHold),
-                        (float)barH
-                    };
-                    DrawRectangleRounded(barFill, 0.3f, 8, Fade(neonGreen, 0.95f));
-
-                    // hold R text above bar
-                    int htSize = 20;
-                    int htW = MeasureText(holdText, htSize);
-                    DrawText(holdText,
-                        screenW / 2 - htW / 2,
-                        barY - 32,
-                        htSize,
-                        Fade(WHITE, 0.9f));
-                }
+            if (!alive && !levelFinished) {
+                // death case
+                titleText = "YOU DIED";
+                storyMsg = "Story text will be shown here after each death.";
+                holdText = "Hold R to respawn";
+                titleColor = neonRed;      // red only for the title
+            }
+            else {
+                // level finished case
+                titleText = "LEVEL COMPLETE";
+                storyMsg = "Outro text will be shown here after finishing the level.";
+                holdText = "Hold R to restart";
+                titleColor = neonGreen;    // victory color
             }
 
+            // title
+            int titleSize = 32;
+            int tw = MeasureText(titleText, titleSize);
+            DrawText(titleText,
+                screenW / 2 - tw / 2,
+                panelY + 24,
+                titleSize,
+                titleColor);
 
+            // story text area (later you can replace this with DrawTextRec for long paragraphs)
+            int storySize = 22;
+            int storyY = panelY + 80;
+            int sw = MeasureText(storyMsg, storySize);
+            DrawText(storyMsg,
+                screenW / 2 - sw / 2,
+                storyY,
+                storySize,
+                Fade(WHITE, 0.95f));
+
+            // respawn / restart progress bar inside panel
+            int barW = (int)(panelW * 0.6f);
+            int barH = 26;
+            int barX = screenW / 2 - barW / 2;
+            int barY = panelY + panelH - barH - 70; // a bit above bottom edge
+
+            Rectangle barBg = { (float)barX, (float)barY, (float)barW, (float)barH };
+            DrawRectangleRounded(barBg, 0.3f, 8, Fade(BLACK, 0.7f));
+            DrawRectangleLinesEx(barBg, 2.0f, Fade(WHITE, 0.8f));
+
+            Rectangle barFill = {
+                (float)barX,
+                (float)barY,
+                (float)(barW * respawnHold),
+                (float)barH
+            };
+            DrawRectangleRounded(barFill, 0.3f, 8, Fade(neonGreen, 0.95f));
+
+            // hold R text above bar
+            int htSize = 20;
+            int htW = MeasureText(holdText, htSize);
+            DrawText(holdText,
+                screenW / 2 - htW / 2,
+                barY - 32,
+                htSize,
+                Fade(WHITE, 0.9f));
         }
+
 
         EndDrawing();
 
@@ -863,6 +908,11 @@ int main() {
         prevGrounded = grounded;
 
     }
+    StopMusicStream(menuMusic);
+    StopMusicStream(levelMusic);
+    UnloadMusicStream(menuMusic);
+    UnloadMusicStream(levelMusic);
+    CloseAudioDevice();
 
     CloseWindow();
     return 0;

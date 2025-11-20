@@ -1,13 +1,4 @@
-﻿  level.cpp
-  main.cpp
-C:\Users\makissse\Documents\GitHub\NeonPulse\NeonPulse\src\main.cpp(742,25): warning C4101: titleText: неиспользованная локальная переменная
-C:\Users\makissse\Documents\GitHub\NeonPulse\NeonPulse\src\main.cpp(743,25): warning C4101: storyMsg: неиспользованная локальная переменная
-C:\Users\makissse\Documents\GitHub\NeonPulse\NeonPulse\src\main.cpp(744,25): warning C4101: holdText: неиспользованная локальная переменная
-C:\Users\makissse\Documents\GitHub\NeonPulse\NeonPulse\src\main.cpp(765,29): warning C4101: titleText: неиспользованная локальная переменная
-C:\Users\makissse\Documents\GitHub\NeonPulse\NeonPulse\src\main.cpp(766,29): warning C4101: storyMsg: неиспользованная локальная переменная
-C:\Users\makissse\Documents\GitHub\NeonPulse\NeonPulse\src\main.cpp(768,23): warning C4101: titleColor: неиспользованная локальная переменная
-C:\Users\makissse\Documents\GitHub\NeonPulse\NeonPulse\src\main.cpp(767,29): warning C4101: holdText: неиспользованная локальная переменная
-  Создание кода...
+﻿  main.cpp
   NeonPulse.vcxproj -> C:\Users\makissse\Documents\GitHub\NeonPulse\x64\Debug\NeonPulse.exe
   "pwsh.exe" не является внутренней или внешней
   командой, исполняемой программой или пакетным файлом.
