@@ -2,9 +2,9 @@
 #include "raylib.h"
 #include <vector>
 
-// -------------------------
-// Basic structs
-// -------------------------
+// ---------------------------------
+// Basic structs for game entities
+// ---------------------------------
 
 struct MovingPlatform {
     Rectangle base;
@@ -73,6 +73,13 @@ struct SpeedPad {
     float multiplier;
     float duration;
     Color color;
+};
+
+struct GravityPad
+{
+    Rectangle rect;
+    Color     color; 
+    bool      flipsUp; 
 };
 
 // -------------------------

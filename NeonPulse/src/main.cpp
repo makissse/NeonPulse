@@ -16,6 +16,10 @@
 using namespace std;
 
 
+// ----------------------------------------
+// Story bloclk text wrapping and drawing
+// ----------------------------------------
+
 void DrawWrappedTextBlockLeft(Font font, const  string& text, Rectangle bounds,
     float fontSize, float spacing, Color tint)
 {
@@ -41,8 +45,7 @@ void DrawWrappedTextBlockLeft(Font font, const  string& text, Rectangle bounds,
             // Flush current word into line
             if (!currentWord.empty())
             {
-                 string candidate =
-                    currentLine.empty() ? currentWord : currentLine + " " + currentWord;
+                 string candidate = currentLine.empty() ? currentWord : currentLine + " " + currentWord;
 
                 float width = MeasureTextEx(font, candidate.c_str(), fontSize, spacing).x;
 
@@ -115,18 +118,21 @@ int main() {
     const int screenH = 720;
     InitWindow(screenW, screenH, "Neon Pulse");
 
-    // --- AUDIO INIT ---
-    InitAudioDevice(); // Initialize audio device for music and sounds
+    // --------------------
+	// Audio setup
+    // --------------------
 
-    // Load menu ambient music (looped)
+    InitAudioDevice();
+
+    // Load menu ambient music 
     Music menuMusic = LoadMusicStream("audio/menu_ambient.mp3");
     menuMusic.looping = true;
-    SetMusicVolume(menuMusic, 0.3f); // Adjust volume to taste
+    SetMusicVolume(menuMusic, 0.2f); 
 
-    // Load main level music (looped)
+    // Load main level music 
     Music levelMusic = LoadMusicStream("audio/level_theme.mp3");
     levelMusic.looping = true;
-    SetMusicVolume(levelMusic, 0.4f); // Adjust volume to taste
+    SetMusicVolume(levelMusic, 0.2f); 
 
     // At game start we are in menu, so start menu music immediately
     PlayMusicStream(menuMusic);
@@ -152,21 +158,25 @@ int main() {
             StopMusicStream(menuMusic);
             menuMusicPlaying = false;
         }
-
-        // Ensure level track starts from time 0
-        StopMusicStream(levelMusic);   // reset playback position
+        StopMusicStream(levelMusic);   // reset
         PlayMusicStream(levelMusic);   // start playing from the beginning
         levelMusicPlaying = true;
         };
 
-	//--- STORY ---
-    StoryProgress storyProgress;
-    LoadStoryProgress(storyProgress);   // Load endings + completed chapters from disk
+    // --------------------------------
+	// Story functions initialization
+    // --------------------------------
 
+    StoryProgress storyProgress;
+    LoadStoryProgress(storyProgress);   // Load player info from progress file
     StoryState storyState;              // Runtime state for current story overlay
 
+    // ------------------------------------------
+	// Variable initialization (diferent types)
+    // ------------------------------------------
 
     SetTargetFPS(120);
+
     // Rhythm
     const float BPM = 140.0f;
     const float secondsPerBeat = 60.0f / BPM;
@@ -184,16 +194,16 @@ int main() {
     bool holdJumpActive = false;
     bool prevGrounded = false;
     const float gravityBase = 2300.0f;
-    const float jumpVelBase = -760.0f; // base jump velocity; multiply by gravityDir for effective jump
+    const float jumpVelBase = -760.0f; // base jump velocity
     int gravityDir = 1; // 1 = normal (gravity pulls down), -1 = inverted (gravity pulls up)
-    float gravityFlipTimer = 0.0f; // gravity flip cooldown (prevents immediate re-flip while overlapping a gravity pad)
+    float gravityFlipTimer = 0.0f; // gravity flip cooldown
     
     // Level
-    const float gravityFlipCooldown = 0.35f; // seconds
+	const float gravityFlipCooldown = 0.35f; // seconds between gravity flips
     bool levelFinished = false;
-    float endScreenTimer = 0.0f;          // how long we have been in "run over" state
-    const float endScreenDelay = 1.5f;    // delay before showing overlay, seconds
-    bool overlayMusicStarted = false;     // true when ambient for respawn/finish menu has been started
+	float endScreenTimer = 0.0f;          // how long we have been in end screen state
+    const float endScreenDelay = 1.5f;    // delay before showing overlay
+	bool overlayMusicStarted = false;     // whether end screen music has started
 
     //Story
     const int TOTAL_STORY_CHAPTERS = 11;
@@ -204,8 +214,8 @@ int main() {
 
     // Start / respawn menus
     bool inStartMenu = true;     // start in main menu
-    float respawnHold = 0.0f;    // 0..1 hold progress for respawn
-    const float respawnFillSpeed = 0.4f;   // how fast bar fills while holding R
+    float respawnHold = 0.0f;    // hold progress for respawn
+    const float respawnFillSpeed = 0.4f;   // how fast bar fills
     const float respawnDecaySpeed = 2.4f;  // how fast bar empties when released
 
     // Camera
@@ -225,7 +235,7 @@ int main() {
     Color neonPurple = { 170, 60, 255, 255 };
     Color neonRed = { 255, 49, 49, 255 };
 
-    // Sections (visual)
+    // Sections (only visual)
     vector<Section> sections = {
         { 0.0f,     1200.0f,  { 20, 30, 60, 255 }, { 40, 10, 80, 255 } },
         { 1200.0f,  2600.0f,  { 10, 50, 80, 255 }, { 0, 20, 40, 255 } },
@@ -241,15 +251,13 @@ int main() {
         { 0.22f, neonCyan,   28, 4.0f,  14.0f },
     };
 
-
+	// Vectors to hold level entities
     vector<MovingPlatform> platforms;
     vector<Spike> spikes;
     vector<Arch> arches;
     vector<JumpPad> jumpPads;
     vector<SpeedPad> speedPads;
     vector<GhostPlatform> ghostPlatforms;
-
-    // GravityPad
     vector<GravityPad> gravityPads;
 
     // helper to add spike clusters
@@ -261,11 +269,10 @@ int main() {
         }
      };
 
+    Rectangle finishLine{};
 
 
-    //speedPads.push_back({ { 900, defaultFloorY - 8, 66, 8 }, 5.5f, 7.0f, neonGreen });
-    Rectangle finishLine{}; // will be filled by BuildLevel
-
+	// Build the level
     BuildLevel(
         platforms,
         ghostPlatforms,
@@ -290,9 +297,8 @@ int main() {
         vector<Particle> particles;
         particles.reserve(400);
 
-        // Helper: reset full game state for a new run
+        // reset full game state for a new run
         auto ResetRun = [&]() {
-            // reset player core state
             player = { 100, 520, 36, 36 };
             playerVel = { 0.0f, 0.0f };
             grounded = false;
@@ -332,13 +338,12 @@ int main() {
             // Allow overlay logic and music to start fresh on next ending
             overlayMusicStarted = false;         
 
-            // Clear runtime story state (persistent progress is stored separately)
+            // Clear runtime story state
             storyState.active = false;           
             storyState.blocks.clear();           
             storyState.currentBlock = 0;          
             storyState.chapterIndex = 0;          
-            storyState.fullyRead = false;         
-            storyState.timeOnScreen = 0.0f;       
+            storyState.fullyRead = false;               
             };
 
 
@@ -348,7 +353,7 @@ int main() {
         return expf(-6.0f * beat);
         };
 
-    // Helper: current section
+    // current section
     auto CurrentSection = [&](float x) -> Section {
         for (auto& s : sections) {
             if (x >= s.startX && x < s.endX) return s;
@@ -358,7 +363,10 @@ int main() {
 
 
 
-    // Main loop
+    // ----------------
+	// Main game loop
+    // ----------------
+
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         songTime += dt;
@@ -373,7 +381,7 @@ int main() {
         }
 
         if (inStartMenu) {
-            // --- Start game input: ENTER or mouse click on big PLAY button ---
+            // --- Start game input ---
 
             // button geometry
             int btnW = 260;
@@ -392,9 +400,8 @@ int main() {
                 ResetRun();        // reset all game state
                 inStartMenu = false;
 
-                // --- MUSIC SWITCH: MENU -> LEVEL (RESTART TRACK) ---
+				// music switch
                 SwitchToLevelMusicRestart();
-                // --- END MUSIC SWITCH ---
             }
 
             BeginDrawing();
@@ -408,11 +415,7 @@ int main() {
             const char* title = "NEON PULSE";
             int titleSize = 64;
             int tw = MeasureText(title, titleSize);
-            DrawText(title,
-                screenW / 2 - tw / 2,
-                screenH / 4,
-                titleSize,
-                Fade(WHITE, 0.95f));
+            DrawText(title, screenW / 2 - tw / 2, screenH / 4, titleSize, Fade(WHITE, 0.95f));
 
             // big PLAY button
             Color btnFill = hovered ? Fade(neonGreen, 0.95f) : Fade(neonCyan, 0.85f);
@@ -423,21 +426,13 @@ int main() {
             const char* playText = "PLAY";
             int playSize = 32;
             int pw = MeasureText(playText, playSize);
-            DrawText(playText,
-                screenW / 2 - pw / 2,
-                btnY + btnH / 2 - playSize / 2,
-                playSize,
-                Fade(BLACK, 0.9f));
+            DrawText(playText, screenW / 2 - pw / 2, btnY + btnH / 2 - playSize / 2, playSize, Fade(BLACK, 0.9f));
 
             // hint text
             const char* pressMsg = "Press ENTER or click PLAY";
             int msgSize = 20;
             int mw = MeasureText(pressMsg, msgSize);
-            DrawText(pressMsg,
-                screenW / 2 - mw / 2,
-                btnY + btnH + 40,
-                msgSize,
-                Fade(WHITE, 0.85f));
+            DrawText(pressMsg, screenW / 2 - mw / 2, btnY + btnH + 40, msgSize, Fade(WHITE, 0.85f));
 
             EndDrawing();
             continue;   // skip gameplay while in start menu
@@ -445,14 +440,12 @@ int main() {
 
 
 
-
-
-        // Input: jump
+        // --- Jump ---
         if (alive) {
             // Update the holding state
             holdJumpActive = (IsKeyDown(KEY_SPACE) || IsKeyDown(KEY_UP));
 
-            // Immediate single jump on key press (preserves original tap behavior)
+            // Immediate single jump on key press
             if ((IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_UP)) && grounded) {
                 playerVel.y = jumpVelBase * (float)gravityDir;
                 grounded = false;
@@ -494,7 +487,7 @@ int main() {
         if (gravityFlipTimer > 0.0f) gravityFlipTimer = max(0.0f, gravityFlipTimer - dt);
 
 
-        // player horizontal control (auto-run)
+        // player horizontal control
         if (alive) playerVel.x = runSpeed;
         else playerVel.x = 0.0f;
         if (levelFinished) playerVel.x = 0.0f;
@@ -513,7 +506,7 @@ int main() {
         // Floor / ceiling collision handling with gravity direction awareness
         grounded = false;
         if (gravityDir > 0) {
-            // normal gravity: floor is defaultFloorY, ceiling is ceilingYTop
+			// normal gravity
             if (player.y + player.height >= defaultFloorY) {
                 player.y = defaultFloorY - player.height;
                 playerVel.y = 0.0f;
@@ -537,74 +530,76 @@ int main() {
             }
         }
 
-        // Moving platforms collision + resolve
-        float tPhase = songTime + pulse * 0.03f;
+        // Static platforms collision + resolve
+        float tPhase = songTime + pulse * 0.03f; // still used later for ghost platforms, keep it
+
         for (auto& p : platforms) {
-            Rectangle pr = p.GetRect(tPhase);
-            if (pr.x + pr.width < player.x - 300.0f || pr.x > player.x + 900.0f) continue; // cull
-            if (RectsIntersect(player, pr)) {
-                Rectangle prevPlayer = { player.x - playerVel.x * dt, player.y - playerVel.y * dt, player.width, player.height };
+            // For static platforms we can use the base rectangle directly
+            Rectangle pr = p.base;
 
-                // Determine contact sides based on previous position
-                bool fromTop = (prevPlayer.y + prevPlayer.height <= pr.y + 1.0f);
-                bool fromBottom = (prevPlayer.y >= pr.y + pr.height - 1.0f);
-                bool fromLeft = (prevPlayer.x + prevPlayer.width <= pr.x + 1.0f);
-                bool fromRight = (prevPlayer.x >= pr.x + pr.width - 1.0f);
+            // Simple horizontal culling by camera, to skip far platforms
+            if (pr.x + pr.width < player.x - 300.0f || pr.x > player.x + 900.0f) continue;
 
-                if (gravityDir > 0) {
-                    // normal gravity: landing is fromTop
-                    if (fromTop) {
-                        player.y = pr.y - player.height;
-                        playerVel.y = 0.0f;
-                        grounded = true;
-                        if (!p.vertical) {
-                            float angularFreq = p.speed * 2.0f * PI;
-                            float platformVel = cosf(p.phase + tPhase * p.speed * 2.0f * PI) * p.amplitude * angularFreq;
-                            player.x += platformVel * dt * 0.08f;
-                        }
-                    }
-                    else if (fromBottom) {
-                        player.y = pr.y + pr.height;
-                        playerVel.y = 0.0f;
-                    }
-                    else if (fromLeft) {
-                        player.x = pr.x - player.width;
-                    }
-                    else if (fromRight) {
-                        player.x = pr.x + pr.width;
-                    }
+            if (!RectsIntersect(player, pr)) continue;
+
+            // Previous frame player rect (used to detect collision side)
+            Rectangle prevPlayer = {
+                player.x - playerVel.x * dt,
+                player.y - playerVel.y * dt,
+                player.width,
+                player.height
+            };
+
+            // Determine contact sides based on previous position
+            bool fromTop = (prevPlayer.y + prevPlayer.height <= pr.y + 1.0f);
+            bool fromBottom = (prevPlayer.y >= pr.y + pr.height - 1.0f);
+            bool fromLeft = (prevPlayer.x + prevPlayer.width <= pr.x + 1.0f);
+            bool fromRight = (prevPlayer.x >= pr.x + pr.width - 1.0f);
+
+            if (gravityDir > 0) {
+                // Normal gravity
+                if (fromTop) {
+                    player.y = pr.y - player.height;
+                    playerVel.y = 0.0f;
+                    grounded = true;
                 }
-                else {
-                    // inverted gravity: landing occurs fromBottom
-                    if (fromBottom) {
-                        player.y = pr.y + pr.height;
-                        playerVel.y = 0.0f;
-                        grounded = true;
-                        if (!p.vertical) {
-                            float angularFreq = p.speed * 2.0f * PI;
-                            float platformVel = cosf(p.phase + tPhase * p.speed * 2.0f * PI) * p.amplitude * angularFreq;
-                            player.x += platformVel * dt * 0.08f;
-                        }
-                    }
-                    else if (fromTop) {
-                        player.y = pr.y - player.height;
-                        playerVel.y = 0.0f;
-                    }
-                    else if (fromLeft) {
-                        player.x = pr.x - player.width;
-                    }
-                    else if (fromRight) {
-                        player.x = pr.x + pr.width;
-                    }
+                else if (fromBottom) {
+                    // Hit platform from below
+                    player.y = pr.y + pr.height;
+                    if (playerVel.y < 0.0f) playerVel.y = 0.0f;
                 }
-
+                else if (fromLeft) {
+                    player.x = pr.x - player.width;
+                }
+                else if (fromRight) {
+                    player.x = pr.x + pr.width;
+                }
+            }
+            else {
+                // Inverted gravity
+                if (fromBottom) {
+                    player.y = pr.y + pr.height;
+                    playerVel.y = 0.0f;
+                    grounded = true;
+                }
+                else if (fromTop) {
+                    player.y = pr.y - player.height;
+                    if (playerVel.y > 0.0f) playerVel.y = 0.0f;
+                }
+                else if (fromLeft) {
+                    player.x = pr.x - player.width;
+                }
+                else if (fromRight) {
+                    player.x = pr.x + pr.width;
+                }
             }
         }
+
 
         // JumpPad activation
         for (const auto& jp : jumpPads) {
             if (RectsIntersect(player, jp.rect)) {
-                playerVel.y = jumpVelBase * gravityDir * jp.strength; // immediately boost up
+                playerVel.y = jumpVelBase * gravityDir * jp.strength;
                 grounded = false;
                 // Jump pad particles
                 for (int i = 0; i < 16; ++i) {
@@ -615,7 +610,7 @@ int main() {
             }
         }
 
-        // SpeedPad activation (instant apply multiplier)
+        // SpeedPad activation
         for (const auto& sp : speedPads) {
             if (RectsIntersect(player, sp.rect)) {
                 speedTimer = sp.duration;
@@ -630,7 +625,7 @@ int main() {
             }
         }
 
-        // GravityPad activation: flip gravity when touching a gravity pad
+        // GravityPad activation
         for (const auto& gp : gravityPads) {
             if (RectsIntersect(player, gp.rect) && gravityFlipTimer <= 0.0f) {
                 // flip gravity
@@ -640,8 +635,6 @@ int main() {
                 // reset vertical velocity for predictability
                 playerVel.y = 0.0f;
 
-                // - if gravity becomes inverted => force player to be on "ceiling" (grounded = true)
-                // - if gravity becomes normal => place player on floor
                 if (gravityDir < 0) {
                     // place player just below the ceiling so they land/stand on it
                     player.y = ceilingYTop + 0.5f; // small offset to avoid overlapping spike geometry
@@ -705,13 +698,13 @@ int main() {
 
 		// Auto-jump on landing
         if (alive) {
-            // Landing detection: prevGrounded == false && grounded == true
+            // Landing detection
             if (!prevGrounded && grounded && holdJumpActive) {
                 // immediate auto-jump
                 playerVel.y = jumpVelBase * (float)gravityDir;
                 grounded = false;
 
-                // jump particles (same visual effect as manual jump)
+                // jump particles
                 for (int i = 0; i < 10; ++i) {
                     float ang = (float)GetRandomValue(-100, -80) * DEG2RAD;
                     float sp = (float)GetRandomValue(160, 320);
@@ -725,14 +718,13 @@ int main() {
                 }
             }
         }
-        // Respawn / restart hold-to-retry logic
+        // Respawn / restart
         bool runOver = (!alive || levelFinished);
 
         if (runOver) {
             // Increase end-screen timer while we stay in this state
             endScreenTimer += dt;
 
-            // Only allow Hold-R and bar after delay
             if (endScreenTimer >= endScreenDelay) {
                 bool holdingR = IsKeyDown(KEY_R);
 
@@ -778,7 +770,7 @@ int main() {
         camX = player.x - 280.0f;
 
 
-        // Particles update & cleanup
+        // Particles update and cleanup
         for (int i = (int)particles.size() - 1; i >= 0; --i) {
             particles[i].life -= dt;
             if (particles[i].life <= 0.0f) {
@@ -794,7 +786,9 @@ int main() {
 
         if (deathShake > 0.0f) deathShake = max(0.0f, deathShake - 24.0f * dt);
 
-        // === RENDER ===
+        // ----------------
+		// Render
+        // ----------------
         BeginDrawing();
         ClearBackground(BLACK);
 
@@ -811,7 +805,7 @@ int main() {
         DrawRectangleGradientH(0, (int)defaultFloorY, screenW, 6, railA, railB);
         DrawRectangleGradientH(0, (int)ceilingYTop - 6, screenW, 6, railB, railA);
 
-		// Draw speed pads & jump pads & gravity pads
+		// Draw speedpads, jumppads, gravitypads
         for (const auto& sp : speedPads) {
             float x = sp.rect.x - camX;
             if (x + sp.rect.width < -120 || x > screenW + 120) continue;
@@ -828,31 +822,29 @@ int main() {
             float x = gp.rect.x - camX;
             if (x + gp.rect.width < -120 || x > screenW + 120) continue;
 
-            // core rectangle (rounded) and faint outline/glow
             DrawRectangleRounded({ x, gp.rect.y, gp.rect.width, gp.rect.height }, 0.25f, 6, Fade(gp.color, 0.92f));
             DrawRectangleLinesEx({ x, gp.rect.y, gp.rect.width, gp.rect.height }, 2.0f, Fade(WHITE, 0.08f));
 
-            // small icon to suggest flip (triangle up or down)
+            // small icon to suggest flip
             Vector2 center = { x + gp.rect.width * 0.5f, gp.rect.y + gp.rect.height * 0.5f };
             Vector2 t1, t2, t3;
-
             if (gp.flipsUp) {
-                // Up arrow: tip at top, base at bottom (works already)
-                t1 = { center.x, center.y - 6.0f };            // top
-                t2 = { center.x - 6.0f, center.y + 6.0f };     // left-bottom
-                t3 = { center.x + 6.0f, center.y + 6.0f };     // right-bottom
+                // Up arrow
+                t1 = { center.x, center.y - 6.0f };            
+                t2 = { center.x - 6.0f, center.y + 6.0f };    
+                t3 = { center.x + 6.0f, center.y + 6.0f };     
 
-                // draw filled triangle + outline
+                // draw filled triangle
                 DrawTriangle(t1, t2, t3, Fade(WHITE, 0.85f));
                 DrawTriangleLines(t1, t2, t3, Fade(BLACK, 0.25f));
             }
             else {
-                // Down arrow: tip at bottom, base at top
-                t1 = { center.x, center.y + 6.0f };            // bottom
-                t2 = { center.x + 6.0f, center.y - 6.0f };     // right-top
-                t3 = { center.x - 6.0f, center.y - 6.0f };     // left-top
+                // Down arrow
+                t1 = { center.x, center.y + 6.0f };            
+                t2 = { center.x + 6.0f, center.y - 6.0f };     
+                t3 = { center.x - 6.0f, center.y - 6.0f };     
 
-                // draw filled triangle + outline
+                // draw filled triangle
                 DrawTriangle(t1, t2, t3, Fade(WHITE, 0.85f));
                 DrawTriangleLines(t1, t2, t3, Fade(BLACK, 0.25f));
             }
@@ -907,8 +899,7 @@ int main() {
 
         // Beat ring
         float ringR = 22.0f + 18.0f * pulse;
-        DrawCircleLines((int)(drawPlayer.x + drawPlayer.width * 0.5f), (int)(drawPlayer.y + drawPlayer.height * 0.5f),
-            ringR, Fade(neonYellow, 0.6f * pulse));
+        DrawCircleLines((int)(drawPlayer.x + drawPlayer.width * 0.5f), (int)(drawPlayer.y + drawPlayer.height * 0.5f), ringR, Fade(neonYellow, 0.6f * pulse));
 
         // Finish line visual
         if (finishLine.x - camX < screenW + 200) {
@@ -920,16 +911,17 @@ int main() {
         DrawText("Neon Pulse", 24, 20, 28, Fade(WHITE, 0.9f));
         DrawText(TextFormat("Jump: Space/Up | Retry: hold R"), 24, 56, 20, Fade(WHITE, 0.6f));
 
-
+		// Speed display
         if (speedTimer > 0.0f) {
             DrawText(TextFormat("SPEED x%.2f (%.1fs)", speedMultiplierActive, speedTimer), 24, 108, 18, Fade(neonGreen, 0.9f));
         }
-        // Unified overlay for death and level completion (same layout, with story support)
+
+
+		// overlay menu with story in it
         if ((!alive || levelFinished) && endScreenTimer >= endScreenDelay) {
 
-            // First frame when overlay appears for this run
             if (!overlayMusicStarted) {
-                // Switch music: level -> menu
+                // Switch music
                 SwitchToMenuMusic();
                 overlayMusicStarted = true;
 
@@ -939,8 +931,6 @@ int main() {
 
             // --- Story input update ---
             if (storyState.active) {
-                // Update time spent on this screen (can be used later for "10 seconds" rule)
-                storyState.timeOnScreen += dt;
 
                 // Left mouse click shows next block
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -969,17 +959,12 @@ int main() {
 
             if (storyState.active && storyState.chapterIndex > 0) {
                 int progFontSize = 20;
-                const char* progText = TextFormat(
-                    "%d / %d",
-                    storyState.chapterIndex,   // current chapter number
-                    TOTAL_STORY_CHAPTERS       // total chapters
-                );
+                const char* progText = TextFormat("%d / %d", storyState.chapterIndex, TOTAL_STORY_CHAPTERS);
 
-                // Measure text width to right-align inside panel
+				// progress text position
                 int progWidth = MeasureText(progText, progFontSize);
-
-                int progX = (int)(panelRect.x + panelRect.width - progWidth - 28); // right margin
-                int progY = (int)(panelRect.y + 30);                               // top margin
+                int progX = (int)(panelRect.x + panelRect.width - progWidth - 28); 
+                int progY = (int)(panelRect.y + 30);                               
 
                 DrawText(progText, progX, progY, progFontSize, WHITE);
             }
@@ -1010,18 +995,14 @@ int main() {
             // Title
             int titleSize = 32;
             int tw = MeasureText(titleText, titleSize);
-            DrawText(titleText,
-                screenW / 2 - tw / 2,
-                panelY + 24,
-                titleSize,
-                titleColor);
+            DrawText(titleText, screenW / 2 - tw / 2, panelY + 24, titleSize, titleColor);
 
             // Story text area inside panel
             Rectangle storyRect = {
                 panelRect.x + 40.0f,
                 panelRect.y + 80.0f,
                 panelRect.width - 80.0f,
-                panelRect.height - 230.0f   // larger bottom margin for bar and hint
+                panelRect.height - 230.0f
             };
 
 
@@ -1035,14 +1016,7 @@ int main() {
 
                 const  string& blockText = storyState.blocks[index];
 
-                DrawWrappedTextBlockLeft(
-                    GetFontDefault(),
-                    blockText,
-                    storyRect,
-                    22.0f,   // font size
-                    2.0f,    // spacing between characters
-                    Fade(WHITE, 0.96f)
-                );
+                DrawWrappedTextBlockLeft(GetFontDefault(), blockText, storyRect, 22.0f, 2.0f, Fade(WHITE, 0.96f));
             }
             else {
                 // Fallback text if no story is available
@@ -1050,18 +1024,11 @@ int main() {
                     ? "You died. Try one more time, please;)"
                     : "Level complete.";
 
-                DrawWrappedTextBlockLeft(
-                    GetFontDefault(),
-                    fallbackMsg,
-                    storyRect,
-                    22.0f,
-                    2.0f,
-                    Fade(WHITE, 0.96f)
-                );
+                DrawWrappedTextBlockLeft(GetFontDefault(), fallbackMsg, storyRect, 22.0f, 2.0f, Fade(WHITE, 0.96f));
             }
 
 
-            // Mouse hint for story navigation
+			// Click hint text
             const char* clickHint = nullptr;
             if (storyState.active && storyState.currentBlock < (int)storyState.blocks.size()) {
                 clickHint = "Left mouse button: next line";
@@ -1073,20 +1040,14 @@ int main() {
             if (clickHint) {
                 int hintSize = 18;
                 int hw = MeasureText(clickHint, hintSize);
-                DrawText(
-                    clickHint,
-                    screenW / 2 - hw / 2,
-                    (int)(storyRect.y + storyRect.height - 18),
-                    hintSize,
-                    Fade(WHITE, 0.75f)
-                );
+                DrawText(clickHint, screenW / 2 - hw / 2, (int)(storyRect.y + storyRect.height - 18), hintSize, Fade(WHITE, 0.75f));
             }
 
             // Respawn / restart progress bar inside panel
             int barW = (int)(panelW * 0.6f);
             int barH = 26;
             int barX = screenW / 2 - barW / 2;
-            int barY = panelY + panelH - barH - 70; // A bit above bottom edge
+            int barY = panelY + panelH - barH - 70;
 
             Rectangle barBg = { (float)barX, (float)barY, (float)barW, (float)barH };
             DrawRectangleRounded(barBg, 0.3f, 8, Fade(BLACK, 0.7f));
@@ -1103,14 +1064,8 @@ int main() {
             // "Hold R" text above bar
             int htSize = 20;
             int htW = MeasureText(holdText, htSize);
-            DrawText(holdText,
-                screenW / 2 - htW / 2,
-                barY - 32,
-                htSize,
-                Fade(WHITE, 0.9f));
+            DrawText(holdText, screenW / 2 - htW / 2, barY - 32, htSize, Fade(WHITE, 0.9f));
         }
-
-
 
         EndDrawing();
 

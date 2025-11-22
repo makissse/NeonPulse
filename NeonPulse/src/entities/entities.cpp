@@ -64,7 +64,6 @@ void DrawSpike(const Spike& s, float camX) {
     }
     else {
         // Ceiling spikes (pointing downward)
-        // Fixed: reverse vertex order to correct winding (so fill is visible)
         rightBase = { s.base.x - camX,                s.base.y };
         leftBase = { s.base.x + s.base.width - camX, s.base.y };
         tip = { s.base.x + s.base.width * 0.5f - camX, s.base.y + s.base.height };

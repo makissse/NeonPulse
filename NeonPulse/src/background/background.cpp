@@ -6,13 +6,14 @@ using namespace std;
 
 
 // -------------------------
-// Background rendering implementation
+// Background rendering 
 // -------------------------
 
-void DrawBackground(int screenW, int screenH, const Section& sec, float camX,
-    const vector<ParallaxLayer>& layers, float beatPulse) {
+void DrawBackground(int screenW, int screenH, const Section& sec, float camX, const vector<ParallaxLayer>& layers, float beatPulse) {
     DrawRectangleGradientV(0, 0, screenW, screenH, sec.bgA, sec.bgB);
 
+
+	// Central horizontal band with beat-synced color shift
     int bandH = screenH / 8;
     Color bandColor = {
         (unsigned char)Clamp1(sec.bgB.r + (int)(28 * beatPulse), 0, 255),
@@ -23,6 +24,8 @@ void DrawBackground(int screenW, int screenH, const Section& sec, float camX,
     DrawRectangleGradientH(0, screenH / 2 - bandH / 2, screenW, bandH,
         Fade(bandColor, 0.08f), Fade(bandColor, 0.24f));
 
+
+	// Parallax layers with beat-synced movement
     for (const auto& layer : layers) {
         int count = layer.density;
         for (int i = 0; i < count; ++i) {

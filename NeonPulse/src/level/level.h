@@ -4,15 +4,11 @@
 #include "raylib.h"
 #include "../entities/entities.h"
 
-// Gravity pad type moved out of main.cpp
-struct GravityPad
-{
-    Rectangle rect;  // rectangle area of the pad
-    Color     color; // pad color
-    bool      flipsUp; // true: flip gravity to inverted, false: back to normal
-};
+// -------------------------
+// Level building
+// -------------------------
 
-// This function will build the whole level layout:
+// This function is used to build the level by populating the provided vectors
 // platforms, spikes, pads and finish line.
 void BuildLevel(
     std::vector<MovingPlatform>& platforms,

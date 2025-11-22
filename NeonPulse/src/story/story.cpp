@@ -1,31 +1,31 @@
-// story/story.cpp
 #include "story.h"
-
-#include <fstream>   // For file IO
-#include <string>    // For  string
-#include <vector>    // For  vector
+#include <fstream>   
+#include <string>    
+#include <vector>    
 
 using namespace std;
 
-// Max number of story files: death1.md ... death25.md
+// --------------------
+// Story variables
+// --------------------
+
+// Max number of story files
 static const int MAX_STORY_FILES = 11;
 
-// Relative path to progress file (relative to working directory)
+// Relative path to progress file
 static const char* STORY_PROGRESS_FILE = "story_text/story_progress.dat";
 
 // -------------------------
 // Internal helpers
 // -------------------------
 
-// Split markdown file into blocks separated by empty lines
+// Split markdown file into blocks separated by empty lines, no files -> no story
 static vector<string> LoadStoryBlocksFromMarkdown(const string& fileName)
 {
     vector<string> blocks;
 
-    // Open file using relative path
     ifstream in(fileName);
     if (!in.is_open()) {
-        // File not found -> no story
         return blocks;
     }
 
@@ -34,7 +34,6 @@ static vector<string> LoadStoryBlocksFromMarkdown(const string& fileName)
 
     while (getline(in, line)) {
         if (line.empty()) {
-            // Empty line -> new block
             if (!currentBlock.empty()) {
                 blocks.push_back(currentBlock);
                 currentBlock.clear();
@@ -42,7 +41,7 @@ static vector<string> LoadStoryBlocksFromMarkdown(const string& fileName)
         }
         else {
             if (!currentBlock.empty()) {
-                currentBlock += "\n"; // Keep line breaks inside block
+                currentBlock += "\n"; 
             }
             currentBlock += line;
         }
@@ -56,7 +55,7 @@ static vector<string> LoadStoryBlocksFromMarkdown(const string& fileName)
     return blocks;
 }
 
-// Save story progress into small text file: "endingsTotal chapterCompleted"
+// Save story progress into text file "endingsTotal chapterCompleted"
 static void SaveStoryProgressInternal(const StoryProgress& p)
 {
     ofstream out(STORY_PROGRESS_FILE);
@@ -65,12 +64,11 @@ static void SaveStoryProgressInternal(const StoryProgress& p)
         return;
     }
 
-    // Simple format: "endingsTotal chapterCompleted"
     out << p.endingsTotal << " " << p.chapterCompleted;
 }
 
 // -------------------------
-// Public API
+// Story system functions
 // -------------------------
 
 void LoadStoryProgress(StoryProgress& p)
@@ -89,7 +87,6 @@ void LoadStoryProgress(StoryProgress& p)
     int completed = 0;
 
     // Try to read two integers from the file.
-    // If this fails (non-numbers, empty file, etc.) – keep defaults (0, 0).
     if (!(in >> endings >> completed)) {
         return;
     }
@@ -105,25 +102,21 @@ void LoadStoryProgress(StoryProgress& p)
 
 void StartStoryForCurrentEnding(StoryProgress& progress, StoryState& story)
 {
-    // Count this ending (death or victory) and save immediately
+    // Count this ending and save immediately
     progress.endingsTotal += 1;
     SaveStoryProgressInternal(progress);
 
-    // First ever ending: do NOT show any story
+	// First ever ending -> no story
     if (progress.endingsTotal <= 1) {
         story.active = false;
         story.blocks.clear();
         story.currentBlock = 0;
         story.chapterIndex = 0;
         story.fullyRead = false;
-        story.timeOnScreen = 0.0f;
         return;
     }
-
-    // Chapter to show is always "completed + 1"
-    // Example:
-    //   chapterCompleted = 0 -> show chapter 1
-    //   chapterCompleted = 1 -> show chapter 2, etc.
+    
+	// Decide which chapter to show (next after last completed)
     int chapterToShow = progress.chapterCompleted + 1;
 
     // If we passed the last chapter -> no more story
@@ -133,22 +126,19 @@ void StartStoryForCurrentEnding(StoryProgress& progress, StoryState& story)
         story.currentBlock = 0;
         story.chapterIndex = 0;
         story.fullyRead = false;
-        story.timeOnScreen = 0.0f;
         return;
     }
 
-    // Build file name: "story_text/death1.md", "story_text/death2.md", ...
+    // Build file name
     string fileName = string("story_text/death") + to_string(chapterToShow) + ".md";
 
     vector<string> blocks = LoadStoryBlocksFromMarkdown(fileName);
     if (blocks.empty()) {
-        // No content for this chapter -> no story
         story.active = false;
         story.blocks.clear();
         story.currentBlock = 0;
         story.chapterIndex = 0;
         story.fullyRead = false;
-        story.timeOnScreen = 0.0f;
         return;
     }
 
@@ -158,15 +148,10 @@ void StartStoryForCurrentEnding(StoryProgress& progress, StoryState& story)
     story.currentBlock = 1;             // Start from first block
     story.chapterIndex = chapterToShow;
     story.fullyRead = false;
-    story.timeOnScreen = 0.0f;
 }
 
 void MarkChapterCompletedIfNeeded(StoryProgress& progress, StoryState& story)
 {
-    // Only mark as completed if:
-    // - story is active
-    // - last block is reached
-    // - chapterIndex is valid
     if (!story.active) return;
     if (!story.fullyRead) return;
     if (story.chapterIndex <= 0) return;
