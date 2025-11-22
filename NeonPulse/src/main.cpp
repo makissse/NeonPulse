@@ -5,13 +5,109 @@
 #include <cstdlib>
 #include <algorithm>
 #include <string>
+#include <fstream>
 
 #include "utils/utils.h"
 #include "entities/entities.h"
 #include "background/background.h"
 #include "level/level.h" 
+#include "story/story.h" 
 
 using namespace std;
+
+
+void DrawWrappedTextBlockLeft(Font font, const  string& text, Rectangle bounds,
+    float fontSize, float spacing, Color tint)
+{
+    float maxWidth = bounds.width;
+    float lineSpacing = fontSize * 1.4f; // Distance between lines
+
+    vector<string> lines;
+    string currentLine;
+    string currentWord;
+    bool lastWasNewline = false;
+
+    // Iterate one char past the end to flush last word
+    for (size_t i = 0; i <= text.size(); ++i)
+    {
+        char c = (i < text.size()) ? text[i] : ' ';
+
+        bool isSpace = (c == ' ' || c == '\t');
+        bool isNewline = (c == '\n');
+        bool isEnd = (i == text.size());
+
+        if (isSpace || isNewline || isEnd)
+        {
+            // Flush current word into line
+            if (!currentWord.empty())
+            {
+                 string candidate =
+                    currentLine.empty() ? currentWord : currentLine + " " + currentWord;
+
+                float width = MeasureTextEx(font, candidate.c_str(), fontSize, spacing).x;
+
+                if (width <= maxWidth || currentLine.empty())
+                {
+                    // Word fits into current line
+                    currentLine = candidate;
+                }
+                else
+                {
+                    // Word does not fit, push current line and start new one
+                    if (!currentLine.empty())
+                        lines.push_back(currentLine);
+
+                    currentLine = currentWord;
+                }
+
+                currentWord.clear();
+                lastWasNewline = false;
+            }
+
+            if (isNewline)
+            {
+                // Manual line break: push current line, or empty line for double newline
+                if (!currentLine.empty())
+                {
+                    lines.push_back(currentLine);
+                    currentLine.clear();
+                }
+                else if (lastWasNewline)
+                {
+                    // Two newlines -> explicit empty line
+                    lines.push_back("");
+                }
+
+                lastWasNewline = true;
+            }
+        }
+        else
+        {
+            // Normal character, build word
+            currentWord.push_back(c);
+            lastWasNewline = false;
+        }
+    }
+
+    // Flush remaining line
+    if (!currentLine.empty())
+    {
+        lines.push_back(currentLine);
+    }
+
+    // Drawing phase
+    Vector2 pos = { bounds.x, bounds.y };
+    float bottom = bounds.y + bounds.height;
+
+    for (const  string& line : lines)
+    {
+        if (pos.y + fontSize > bottom)
+            break; // No more vertical space
+
+        DrawTextEx(font, line.c_str(), pos, fontSize, spacing, tint);
+        pos.y += lineSpacing;
+    }
+}
 
 
 int main() {
@@ -63,6 +159,13 @@ int main() {
         levelMusicPlaying = true;
         };
 
+	//--- STORY ---
+    StoryProgress storyProgress;
+    LoadStoryProgress(storyProgress);   // Load endings + completed chapters from disk
+
+    StoryState storyState;              // Runtime state for current story overlay
+
+
     SetTargetFPS(120);
     // Rhythm
     const float BPM = 140.0f;
@@ -92,6 +195,8 @@ int main() {
     const float endScreenDelay = 1.5f;    // delay before showing overlay, seconds
     bool overlayMusicStarted = false;     // true when ambient for respawn/finish menu has been started
 
+    //Story
+    const int TOTAL_STORY_CHAPTERS = 11;
 
     // SpeedPad state
     float speedTimer = 0.0f;
@@ -223,7 +328,19 @@ int main() {
 
             // end screen delay timer
             endScreenTimer = 0.0f;
+
+            // Allow overlay logic and music to start fresh on next ending
+            overlayMusicStarted = false;         
+
+            // Clear runtime story state (persistent progress is stored separately)
+            storyState.active = false;           
+            storyState.blocks.clear();           
+            storyState.currentBlock = 0;          
+            storyState.chapterIndex = 0;          
+            storyState.fullyRead = false;         
+            storyState.timeOnScreen = 0.0f;       
             };
+
 
         // Beat pulse function
         auto BeatPulse = [&](float t) {
@@ -801,60 +918,96 @@ int main() {
 
         // HUD
         DrawText("Neon Pulse", 24, 20, 28, Fade(WHITE, 0.9f));
-        DrawText(TextFormat("BPM: %.0f", BPM), 24, 56, 20, Fade(WHITE, 0.6f));
-        DrawText("Jump: Space/Up | Retry: hold R", 24, 84, 18, Fade(WHITE, 0.6f));
+        DrawText(TextFormat("Jump: Space/Up | Retry: hold R"), 24, 56, 20, Fade(WHITE, 0.6f));
 
 
         if (speedTimer > 0.0f) {
             DrawText(TextFormat("SPEED x%.2f (%.1fs)", speedMultiplierActive, speedTimer), 24, 108, 18, Fade(neonGreen, 0.9f));
         }
-        // Unified overlay for death and level completion (same layout, different text)
+        // Unified overlay for death and level completion (same layout, with story support)
         if ((!alive || levelFinished) && endScreenTimer >= endScreenDelay) {
-            
+
+            // First frame when overlay appears for this run
             if (!overlayMusicStarted) {
-                // This will stop level track and start menu ambient
+                // Switch music: level -> menu
                 SwitchToMenuMusic();
                 overlayMusicStarted = true;
+
+                // Start story chapter for this ending (death or victory)
+                StartStoryForCurrentEnding(storyProgress, storyState);
             }
 
-            // darken the whole screen
+            // --- Story input update ---
+            if (storyState.active) {
+                // Update time spent on this screen (can be used later for "10 seconds" rule)
+                storyState.timeOnScreen += dt;
+
+                // Left mouse click shows next block
+                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                    if (storyState.currentBlock < (int)storyState.blocks.size()) {
+                        storyState.currentBlock++;
+
+                        // If we just reached the last block -> mark chapter as fully read
+                        if (storyState.currentBlock >= (int)storyState.blocks.size()) {
+                            storyState.fullyRead = true;
+                            MarkChapterCompletedIfNeeded(storyProgress, storyState);
+                        }
+                    }
+                }
+            }
+
+            // Darken the whole screen
             DrawRectangle(0, 0, screenW, screenH, Fade(BLACK, 0.65f));
 
-            // large story panel (almost full screen height)
-            int panelW = (int)(screenW * 0.8f);    // wide panel
-            int panelH = (int)(screenH * 0.85f);   // very tall panel
+            // Large story panel (almost full screen height)
+            int panelW = (int)(screenW * 0.8f);
+            int panelH = (int)(screenH * 0.85f);
             int panelX = screenW / 2 - panelW / 2;
             int panelY = screenH / 2 - panelH / 2;
 
             Rectangle panelRect = { (float)panelX, (float)panelY, (float)panelW, (float)panelH };
 
-            // panel color: dark neutral to keep contrast for text
-            Color panelFill = { 8, 10, 24, 235 }; // dark blue-ish background
+            if (storyState.active && storyState.chapterIndex > 0) {
+                int progFontSize = 20;
+                const char* progText = TextFormat(
+                    "%d / %d",
+                    storyState.chapterIndex,   // current chapter number
+                    TOTAL_STORY_CHAPTERS       // total chapters
+                );
+
+                // Measure text width to right-align inside panel
+                int progWidth = MeasureText(progText, progFontSize);
+
+                int progX = (int)(panelRect.x + panelRect.width - progWidth - 28); // right margin
+                int progY = (int)(panelRect.y + 30);                               // top margin
+
+                DrawText(progText, progX, progY, progFontSize, WHITE);
+            }
+
+            // Panel background color
+            Color panelFill = { 8, 10, 24, 235 }; // Dark blue-ish background
             DrawRectangleRounded(panelRect, 0.08f, 12, panelFill);
             DrawRectangleLinesEx(panelRect, 3.0f, Fade(neonCyan, 0.9f));
 
-            // choose texts based on game state
+            // Choose texts based on game state
             const char* titleText;
-            const char* storyMsg;
             const char* holdText;
             Color titleColor;
 
             if (!alive && !levelFinished) {
-                // death case
+                // Death case
                 titleText = "YOU DIED";
-                storyMsg = "Story text will be shown here after each death.";
-                holdText = "Hold R to respawn";
-                titleColor = neonRed;      // red only for the title
+                holdText = "Hold R to respawn, but don't forget about the story";
+                titleColor = neonRed;
             }
             else {
-                // level finished case
+                // Level finished case
                 titleText = "LEVEL COMPLETE";
-                storyMsg = "Outro text will be shown here after finishing the level.";
-                holdText = "Hold R to restart";
-                titleColor = neonGreen;    // victory color
+                holdText = "Hold R to restart, but don't forget about the story";
+                titleColor = neonGreen;
             }
 
-            // title
+            // Title
             int titleSize = 32;
             int tw = MeasureText(titleText, titleSize);
             DrawText(titleText,
@@ -863,21 +1016,77 @@ int main() {
                 titleSize,
                 titleColor);
 
-            // story text area (later you can replace this with DrawTextRec for long paragraphs)
-            int storySize = 22;
-            int storyY = panelY + 80;
-            int sw = MeasureText(storyMsg, storySize);
-            DrawText(storyMsg,
-                screenW / 2 - sw / 2,
-                storyY,
-                storySize,
-                Fade(WHITE, 0.95f));
+            // Story text area inside panel
+            Rectangle storyRect = {
+                panelRect.x + 40.0f,
+                panelRect.y + 80.0f,
+                panelRect.width - 80.0f,
+                panelRect.height - 230.0f   // larger bottom margin for bar and hint
+            };
 
-            // respawn / restart progress bar inside panel
+
+            if (storyState.active && storyState.currentBlock > 0) {
+                // We show only the current block, previous text is not visible anymore
+                int index = storyState.currentBlock - 1;
+                if (index < 0) index = 0;
+                if (index >= (int)storyState.blocks.size()) {
+                    index = (int)storyState.blocks.size() - 1;
+                }
+
+                const  string& blockText = storyState.blocks[index];
+
+                DrawWrappedTextBlockLeft(
+                    GetFontDefault(),
+                    blockText,
+                    storyRect,
+                    22.0f,   // font size
+                    2.0f,    // spacing between characters
+                    Fade(WHITE, 0.96f)
+                );
+            }
+            else {
+                // Fallback text if no story is available
+                const char* fallbackMsg = (!alive && !levelFinished)
+                    ? "You died. Try one more time, please;)"
+                    : "Level complete.";
+
+                DrawWrappedTextBlockLeft(
+                    GetFontDefault(),
+                    fallbackMsg,
+                    storyRect,
+                    22.0f,
+                    2.0f,
+                    Fade(WHITE, 0.96f)
+                );
+            }
+
+
+            // Mouse hint for story navigation
+            const char* clickHint = nullptr;
+            if (storyState.active && storyState.currentBlock < (int)storyState.blocks.size()) {
+                clickHint = "Left mouse button: next line";
+            }
+            else if (storyState.active && !storyState.blocks.empty()) {
+                clickHint = "Story finished: you can restart.";
+            }
+
+            if (clickHint) {
+                int hintSize = 18;
+                int hw = MeasureText(clickHint, hintSize);
+                DrawText(
+                    clickHint,
+                    screenW / 2 - hw / 2,
+                    (int)(storyRect.y + storyRect.height - 18),
+                    hintSize,
+                    Fade(WHITE, 0.75f)
+                );
+            }
+
+            // Respawn / restart progress bar inside panel
             int barW = (int)(panelW * 0.6f);
             int barH = 26;
             int barX = screenW / 2 - barW / 2;
-            int barY = panelY + panelH - barH - 70; // a bit above bottom edge
+            int barY = panelY + panelH - barH - 70; // A bit above bottom edge
 
             Rectangle barBg = { (float)barX, (float)barY, (float)barW, (float)barH };
             DrawRectangleRounded(barBg, 0.3f, 8, Fade(BLACK, 0.7f));
@@ -891,7 +1100,7 @@ int main() {
             };
             DrawRectangleRounded(barFill, 0.3f, 8, Fade(neonGreen, 0.95f));
 
-            // hold R text above bar
+            // "Hold R" text above bar
             int htSize = 20;
             int htW = MeasureText(holdText, htSize);
             DrawText(holdText,
@@ -900,6 +1109,7 @@ int main() {
                 htSize,
                 Fade(WHITE, 0.9f));
         }
+
 
 
         EndDrawing();

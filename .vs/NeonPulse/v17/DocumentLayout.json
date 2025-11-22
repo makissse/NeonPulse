@@ -7,12 +7,32 @@
       "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\level\\level.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\level\\level.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\story\\story.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\story\\story.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\level\\level.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\level\\level.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\level\\level.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\level\\level.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\background\\background.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\background\\background.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\background\\background.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\background\\background.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\entities\\entities.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\entities\\entities.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\story\\story.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\story\\story.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\utils\\utils.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -23,20 +43,8 @@
       "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\utils\\utils.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\entities\\entities.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\entities\\entities.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\entities\\entities.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\entities\\entities.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\background\\background.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\background\\background.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\background\\background.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{8A503F04-CF3E-4E4F-BE02-7543F66B9482}|NeonPulse\\NeonPulse.vcxproj|solutionrelative:NeonPulse\\src\\background\\background.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -56,7 +64,7 @@
               "RelativeDocumentMoniker": "NeonPulse\\src\\main.cpp",
               "ToolTip": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\main.cpp",
               "RelativeToolTip": "NeonPulse\\src\\main.cpp",
-              "ViewState": "AgIAAGACAAAAAAAAAAAQwIICAAANAAAAAAAAAA==",
+              "ViewState": "AgIAALoDAAAAAAAAAAAcwNIDAABEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-10-25T14:31:37.251Z",
               "IsPinned": true,
@@ -68,16 +76,40 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "story.cpp",
+              "DocumentMoniker": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\story\\story.cpp",
+              "RelativeDocumentMoniker": "NeonPulse\\src\\story\\story.cpp",
+              "ToolTip": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\story\\story.cpp",
+              "RelativeToolTip": "NeonPulse\\src\\story\\story.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-11-21T15:44:25.529Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "story.h",
+              "DocumentMoniker": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\story\\story.h",
+              "RelativeDocumentMoniker": "NeonPulse\\src\\story\\story.h",
+              "ToolTip": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\story\\story.h",
+              "RelativeToolTip": "NeonPulse\\src\\story\\story.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-11-21T15:44:07.508Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "level.cpp",
               "DocumentMoniker": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\level\\level.cpp",
               "RelativeDocumentMoniker": "NeonPulse\\src\\level\\level.cpp",
               "ToolTip": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\level\\level.cpp",
               "RelativeToolTip": "NeonPulse\\src\\level\\level.cpp",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAAADQBAAAUAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACEAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-11-18T16:11:17.424Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-18T16:11:17.424Z"
             },
             {
               "$type": "Document",
@@ -87,40 +119,38 @@
               "RelativeDocumentMoniker": "NeonPulse\\src\\level\\level.h",
               "ToolTip": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\level\\level.h",
               "RelativeToolTip": "NeonPulse\\src\\level\\level.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-11-18T16:10:54.752Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 8,
               "Title": "utils.cpp",
               "DocumentMoniker": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\utils\\utils.cpp",
               "RelativeDocumentMoniker": "NeonPulse\\src\\utils\\utils.cpp",
               "ToolTip": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\utils\\utils.cpp",
               "RelativeToolTip": "NeonPulse\\src\\utils\\utils.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-10-25T16:18:42.945Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-25T16:18:42.945Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "entities.cpp",
               "DocumentMoniker": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\entities\\entities.cpp",
               "RelativeDocumentMoniker": "NeonPulse\\src\\entities\\entities.cpp",
               "ToolTip": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\entities\\entities.cpp",
               "RelativeToolTip": "NeonPulse\\src\\entities\\entities.cpp",
-              "ViewState": "AgIAABYAAAAAAAAAAAAkwFIAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-10-25T16:14:50.547Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-25T16:14:50.547Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 9,
               "Title": "utils.h",
               "DocumentMoniker": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\utils\\utils.h",
               "RelativeDocumentMoniker": "NeonPulse\\src\\utils\\utils.h",
@@ -128,47 +158,43 @@
               "RelativeToolTip": "NeonPulse\\src\\utils\\utils.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-10-25T16:14:38.292Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-25T16:14:38.292Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 10,
               "Title": "entities.h",
               "DocumentMoniker": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\entities\\entities.h",
               "RelativeDocumentMoniker": "NeonPulse\\src\\entities\\entities.h",
               "ToolTip": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\entities\\entities.h",
               "RelativeToolTip": "NeonPulse\\src\\entities\\entities.h",
-              "ViewState": "AgIAABcAAAAAAAAAAAAkwFMAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABgAAAAAAAAAAAAYwFMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-10-25T15:46:19.709Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-25T15:46:19.709Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 5,
               "Title": "background.cpp",
               "DocumentMoniker": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\background\\background.cpp",
               "RelativeDocumentMoniker": "NeonPulse\\src\\background\\background.cpp",
               "ToolTip": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\background\\background.cpp",
               "RelativeToolTip": "NeonPulse\\src\\background\\background.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC8AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-10-25T15:42:57.623Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-25T15:42:57.623Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 4,
               "Title": "background.h",
               "DocumentMoniker": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\background\\background.h",
               "RelativeDocumentMoniker": "NeonPulse\\src\\background\\background.h",
               "ToolTip": "C:\\Users\\makissse\\Documents\\GitHub\\NeonPulse\\NeonPulse\\src\\background\\background.h",
               "RelativeToolTip": "NeonPulse\\src\\background\\background.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAAwAAAAPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-10-25T15:41:43.507Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-10-25T15:41:43.507Z"
             }
           ]
         }

@@ -3,6 +3,8 @@
 #include "raymath.h"
 #include <cmath>
 
+using namespace std;
+
 // -------------------------
 // MovingPlatform
 // -------------------------

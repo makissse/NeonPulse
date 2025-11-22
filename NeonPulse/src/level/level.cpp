@@ -4,9 +4,11 @@
 #include <cstdlib>
 #include <algorithm>
 
+using namespace std;
+
 // Local helper to add spike clusters
 static void AddSpikeCluster(
-    std::vector<Spike>& spikes,
+     vector<Spike>& spikes,
     float startX,
     int count,
     float w,
@@ -25,12 +27,12 @@ static void AddSpikeCluster(
 }
 
 void BuildLevel(
-    std::vector<MovingPlatform>& platforms,
-    std::vector<GhostPlatform>& ghostPlatforms,
-    std::vector<Spike>& spikes,
-    std::vector<JumpPad>& jumpPads,
-    std::vector<SpeedPad>& speedPads,
-    std::vector<GravityPad>& gravityPads,
+     vector<MovingPlatform>& platforms,
+     vector<GhostPlatform>& ghostPlatforms,
+     vector<Spike>& spikes,
+     vector<JumpPad>& jumpPads,
+     vector<SpeedPad>& speedPads,
+     vector<GravityPad>& gravityPads,
     Rectangle& finishLine,
     float defaultFloorY,
     float ceilingYTop,
@@ -122,11 +124,11 @@ void BuildLevel(
             neonMagenta, defaultFloorY, ceilingYTop);
     }
 
-    // --- long Jump ---
+    // --- Long Jump ---
     {
         float longJump = 7700.0f;
         speedPads.push_back({ { longJump + 475.0f, defaultFloorY - 8, 66, 8 }, 1.35f, 2.0f, neonGreen });
-        AddSpikeCluster(spikes, longJump + 675.0f, 6, 34.0f, 70.0f, true,
+        AddSpikeCluster(spikes, longJump + 675.0f, 6, 34.0f, 66.0f, true,
             neonMagenta, defaultFloorY, ceilingYTop);
     }
 
